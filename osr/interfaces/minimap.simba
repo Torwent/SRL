@@ -1743,11 +1743,12 @@ function TRSMinimap.GetCleanMinimap(angle: Double = $FFFF): TMufasaBitmap;
 var
   bitmap: TMufasaBitmap;
 begin
-  bitmap := GetMufasaBitmap(BitmapFromClient(Self.Bounds));
-  bitmap.ReplaceColor(0, 1); // We need zero to be unique
-
+  bitmap.Init();
+  bitmap.FromClient(Self.Bounds);
+  bitmap.ReplaceColor(0, 1); //We need zero to be unique
+  WriteLn 'getCleanBitmap';
   Self.CleanMinimap(bitmap);
-
+  WriteLn 'getCleanBitmap1';
   Result.Init();
   if angle = $FFFF then
     angle := Self.GetCompassAngle(False);

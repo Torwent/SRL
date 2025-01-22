@@ -171,13 +171,14 @@ WriteLn Magic.GetSpellBook();
 *)
 function TRSMagic.GetSpellBook(): ERSSpellBook;
 const
-  ARCEUUS_COLOR := CTS1(9801276, 78); // Colors of the book on the gametab
-  ANCIENT_COLOR := CTS1(8077142, 28);
-  LUNAR_COLOR   := CTS1(12761525, 27);
+  //Colors of the book on the gametab
+  ARCEUUS_COLOR: TCTS1Color = [9801276, 78];
+  ANCIENT_COLOR: TCTS1Color = [8077142, 28];
+  LUNAR_COLOR  : TCTS1Color = [12761525, 27];
 var
   box: TBox;
 begin
-  box := Gametabs.GetTabBox(ERSGameTab.MAGIC);
+  box := Gametabs.Boxes[ERSGameTab.MAGIC];
   if SRL.CountColor(ARCEUUS_COLOR, box) >= 81 then Exit(ERSSpellBook.ARCEUUS);
   if SRL.CountColor(ANCIENT_COLOR, box) >= 85 then Exit(ERSSpellBook.ANCIENT);
   if SRL.CountColor(LUNAR_COLOR,   box) >= 85 then Exit(ERSSpellBook.LUNAR);

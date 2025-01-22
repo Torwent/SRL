@@ -530,7 +530,7 @@ WriteLn(Map.Similarity); // Check to see the match percentage if needed
 *)
 function TRSMap.Position(): TPoint;
 var
-  cleanMinimap: TMufasaBitmap;
+  clean: TMufasaBitmap;
   tpa: TPointArray;
   i: Int32;
   hit: TPoint;
@@ -540,13 +540,14 @@ begin
   Self.Region := [];
   Self.Similarity := 0;
 
-  cleanMinimap := Minimap.GetCleanMinimap();
-
-  tpa := Self.ScaledSearch(cleanMinimap);
-
+  WriteLn 'Position0';
+  clean := Minimap.GetCleanMinimap();
+  WriteLn 'Position1';
+  tpa := Self.ScaledSearch(clean);
+  WriteLn 'Position2';
   for i := 0 to High(tpa) do
   begin
-    hit := Self.FullSearch(cleanMinimap, Self.Loader.Map, tpa[i], match);
+    hit := Self.FullSearch(clean, Self.Loader.Map, tpa[i], match);
 
     if match > Self.Similarity then
     begin
@@ -554,7 +555,8 @@ begin
       Result := hit;
     end;
   end;
-  cleanMinimap.Free();
+  clean.Free();
+  WriteLn 'Position3';
 
   Self.RegionIndex := Self.Loader.LocalIndex(Result);
   if Self.RegionIndex > -1 then
@@ -567,7 +569,7 @@ begin
     else
       Exit;
   end;
-  WriteLn 'Position3';
+  WriteLn 'Position4';
 
   Result := [0,0];
 end;
