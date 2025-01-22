@@ -11,21 +11,14 @@ Methods to interact with the deposit box interface.
 type
   ERSDepositButton = (
     LOCK_SETTINGS,
-
-    QUANTITY_1,
-    QUANTITY_5,
-    QUANTITY_10,
-    QUANTITY_CUSTOM,
-    QUANTITY_ALL,
-
-    DEPOSIT_WORN,
-    DEPOSIT_LOOT,
-    DEPOSIT_INVENTORY
+    QUANTITY_1, QUANTITY_5, QUANTITY_10, QUANTITY_CUSTOM, QUANTITY_ALL,
+    DEPOSIT_WORN, DEPOSIT_LOOT, DEPOSIT_INVENTORY
   );
 
   TRSDepositBox = record(TRSTitledInterface)
+    Items: TRSItemInterfaceHandler;
     InventorySlotBoxes, EquipmentSlotBoxes : TBoxArray;
-    Buttons : TRSButtonArray;
+    Buttons: TRSButtonArray;
   end;
 
 function TRSDepositBox.GetAllSlotBoxes(): TBoxArray;
@@ -34,9 +27,36 @@ begin
 end;
 
 procedure TRSDepositBox.Setup(); override;
+begin
+  inherited;
+  Self.Name := 'DepositBox';
+  Self.Items.Name := Self.Name + '.Items';
+  Self.Items.SlotBoxesFunction := @Self.GetAllSlotBoxes;
+end;
+
+procedure TRSDepositBox.SetupAlignment(); override;
 const
   BUTTON_ENABLED_COLORS : array of TCTS1Color = [[2369440, 5], [2700350, 5]];
 begin
+  Self.Alignment.Right := [InterfaceArea.X2, 0];
+  Self.Alignment.Bottom := [InterfaceArea.Y2, 0];
+  Self.Alignment.Center.MaxWidth := 425;
+  Self.Alignment.Center.MaxHeight := 313;
+
+  case RSClient.Mode of
+    ERSClientMode.FIXED:
+    begin
+      Self.Alignment.Left := [InterfaceArea.X1, 0];
+      Self.Alignment.Top := [InterfaceArea.Y1, 0];
+    end;
+
+    ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
+    begin
+      Self.Alignment.Left := [InterfaceArea.X1, -1];
+      Self.Alignment.Top := [InterfaceArea.Y1, -1];
+    end;
+  end;
+
   inherited;
 
   Self.EquipmentSlotBoxes := [
@@ -62,37 +82,6 @@ begin
     [BUTTON_ENABLED_COLORS, 7, Box(75,267,112,300).Offset([Self.X1, Self.Y1]), Point(93,283).Offset(Self.X1, Self.Y1)],
     [BUTTON_ENABLED_COLORS, 8, Box(129,267,166,300).Offset([Self.X1, Self.Y1]), Point(147,283).Offset(Self.X1, Self.Y1)]
   ];
-
-  Self.Name := 'Deposit Screen';
-  Self.ItemInterface.Name := Self.Name + '.ItemInterface';
-  Self.ItemInterface.GetSearchBoxesFunction := @Self.GetAllSlotBoxes;
-end;
-
-procedure TRSDepositBox.SetupAlignment(Mode: ERSClientMode); override;
-begin
-  inherited;
-
-  case Self.Mode of
-    ERSClientMode.FIXED:
-      begin
-        Self.Alignment.Left := [@InterfaceArea.X1];
-        Self.Alignment.Right := [@InterfaceArea.X2];
-        Self.Alignment.Top := [@InterfaceArea.Y1];
-        Self.Alignment.Bottom := [@InterfaceArea.Y2];
-        Self.Alignment.Center.MaxWidth := 425;
-        Self.Alignment.Center.MaxHeight := 313;
-      end;
-
-    ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
-      begin
-        Self.Alignment.Left := [@InterfaceArea.X1, -1];
-        Self.Alignment.Right := [@InterfaceArea.X2];
-        Self.Alignment.Top := [@InterfaceArea.Y1, -1];
-        Self.Alignment.Bottom := [@InterfaceArea.Y2];
-        Self.Alignment.Center.MaxWidth := 425;
-        Self.Alignment.Center.MaxHeight := 313;
-      end;
-  end;
 end;
 
 function TRSDepositBox.GetButton(button: ERSDepositButton): TRSButton;
@@ -406,12 +395,12 @@ end;
 
 function TRSDepositBox.DepositInventory(): Boolean;
 begin
-  Result := Self.IsOpen and Self.Buttons[ERSDepositButton.DEPOSIT_INVENTORY].Click;
+  Result := Self.IsOpen() and Self.Buttons[ERSDepositButton.DEPOSIT_INVENTORY].Click();
 end;
 
 function TRSDepositBox.DepositAll(): Boolean; deprecated 'Use TRSDepositBox.DepositInventory().';
 begin
-  Result := DepositInventory;
+  Result := Self.DepositInventory();
 end;
 
 var
@@ -425,16 +414,14 @@ begin
     Result := ERSGameTab.INVENTORY;
 end;
 
-procedure TRSClient.ClientModeChanged; override;
+procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  DepositBox.SetupAlignment(Self.Mode);
+  DepositBox.SetupAlignment();
 end;
 
-procedure TSRL.Setup; override;
+procedure TSRL.Setup(); override;
 begin
   inherited;
-
   DepositBox.Setup();
 end;

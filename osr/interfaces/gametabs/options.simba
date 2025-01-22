@@ -27,7 +27,7 @@ type
 
   TRSOptions = type TRSInterface;
   
-procedure TRSOptions.Setup; override;
+procedure TRSOptions.Setup(); override;
 begin
   inherited;
 
@@ -35,14 +35,13 @@ begin
   Self.ButtonColors += CTS1(2369440, 5);
 end;
 
-procedure TRSOptions.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSOptions.SetupAlignment(); override;
 begin
+  Self.Alignment.Left := [GameTab.X1];
+  Self.Alignment.Right := [GameTab.X2];
+  Self.Alignment.Top := [GameTab.Y1];
+  Self.Alignment.Bottom := [GameTab.Y2];
   inherited;
-
-  Self.Alignment.Left := [@GameTab.X1];
-  Self.Alignment.Right := [@GameTab.X2];
-  Self.Alignment.Top := [@GameTab.Y1];
-  Self.Alignment.Bottom := [@GameTab.Y2];
 end;
 
 function TRSOptions.GetBrightnessSliderBounds: TBox;
@@ -157,7 +156,7 @@ end;
 
 function TRSOptions.IsHouseOptionsOpen(): Boolean;
 begin
-  Result := SRL.CountColor(CTS2(4630611, 23, 0.04, 0.79), Self.Bounds()) = 148;
+  Result := SRL.CountColor(CTS2(4630611, 23, 0.04, 0.79), Self.Bounds) = 148;
 end;
 
 function TRSOptions.OpenHouseOptions: Boolean;
@@ -244,7 +243,7 @@ end;
 var
   Options: TRSOptions;
 
-function TRSGameTabs.GetCurrentTab: ERSGameTab; override;
+function TRSGameTabs.GetCurrentTab(): ERSGameTab; override;
 begin
   Result := inherited;
 
@@ -252,18 +251,16 @@ begin
     Result := ERSGameTab.OPTIONS;
 end;
 
-procedure TRSClient.ClientModeChanged; override;
+procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  Options.SetupAlignment(Self.Mode);
+  Options.SetupAlignment();
 end;
 
-procedure TSRL.Setup; override;
+procedure TSRL.Setup(); override;
 begin
   inherited;
-
-  Options.Setup;
+  Options.Setup();
 end;
 
 procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;

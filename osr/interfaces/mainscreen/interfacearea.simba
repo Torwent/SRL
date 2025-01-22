@@ -20,8 +20,8 @@ Returns True/False if any interface is found open.
 function TRSInterfaceArea.IsOpen(interfaceType: ERSInterfaceType = ERSInterfaceType.ANY): Boolean;
 begin
   case interfaceType of
-    ERSInterfaceType.CLASSIC: Result := SRL.CountColor(CTS0(3358536, 2), Self.Bounds()) > 10000;
-    ERSInterfaceType.SCROLL:  Result := SRL.CountColor(CTS2(8693433, 5, 0.10, 1.17), Self.Bounds()) > 35000;
+    ERSInterfaceType.CLASSIC: Result := SRL.CountColor(CTS0(3358536, 2), Self.Bounds) > 10000;
+    ERSInterfaceType.SCROLL:  Result := SRL.CountColor(CTS2(8693433, 5, 0.10, 1.17), Self.Bounds) > 35000;
     ERSInterfaceType.ANY:     Result := Self.IsOpen(ERSInterfaceType.CLASSIC) or Self.IsOpen(ERSInterfaceType.SCROLL)
   end;
 end;
@@ -104,39 +104,36 @@ end;
 (*
 ## TRSInterfaceArea.SetupAlignment
 ```pascal
-procedure TRSInterfaceArea.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSInterfaceArea.SetupAlignment(); override;
 ```
 Initializes TRSInterfaceArea coordinates. This is automatically called for you.
 *)
-procedure TRSInterfaceArea.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSInterfaceArea.SetupAlignment(); override;
 begin
-  inherited;
-
-  case Self.Mode of
+  case RSclient.Mode of
     ERSClientMode.FIXED:
-      begin
-        Self.Alignment.Left := [@MainScreen.X1];
-        Self.Alignment.Right := [@MainScreen.X2];
-        Self.Alignment.Top := [@MainScreen.Y1];
-        Self.Alignment.Bottom := [@MainScreen.Y2];
-      end;
+    begin
+      Self.Alignment.Right := [MainScreen.X2];
+      Self.Alignment.Bottom := [MainScreen.Y2];
+    end;
 
     ERSClientMode.RESIZABLE_CLASSIC:
-      begin
-        Self.Alignment.Left := [@MainScreen.X1];
-        Self.Alignment.Right := [@GameTabs.X1, -10];
-        Self.Alignment.Top := [@MainScreen.Y1];
-        Self.Alignment.Bottom := [@Chat.Y1];
-      end;
+    begin
+      Self.Alignment.Right := [GameTabs.X1, -10];
+      Self.Alignment.Bottom := [Chat.Y1];
+    end;
 
     ERSClientMode.RESIZABLE_MODERN:
-      begin
-        Self.Alignment.Left := [@MainScreen.X1];
-        Self.Alignment.Right := [@GameTabs.X1, 15];
-        Self.Alignment.Top := [@MainScreen.Y1];
-        Self.Alignment.Bottom := [@Chat.Y1];
-      end;
+    begin
+      Self.Alignment.Right := [GameTabs.X1, 15];
+      Self.Alignment.Bottom := [Chat.Y1];
+    end;
   end;
+
+  Self.Alignment.Top := [MainScreen.Y1];
+  Self.Alignment.Left := [MainScreen.X1];
+
+  inherited;
 end;
 
 var
@@ -145,9 +142,8 @@ var
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  InterfaceArea.SetupAlignment(Self.Mode);
-  RSInterface.SetupAlignment(Self.Mode);
+  InterfaceArea.SetupAlignment();
+  RSInterface.SetupAlignment();
 end;
 
 procedure TSRL.Setup(); override;

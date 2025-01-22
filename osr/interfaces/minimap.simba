@@ -298,7 +298,7 @@ Debug(Minimap.GetPolygon().Connect());
 *)
 function TRSMinimap.GetPolygon(): TPointArray;
 begin
-  Result := Self.PolygonOffset.Offset(Self.Center());
+  Result := Self.PolygonOffset.Offset(Self.Center);
 end;
 
 
@@ -492,17 +492,15 @@ begin
   AddOnTerminate(@Self.Free);
 end;
 
-procedure TRSMinimap.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSMinimap.SetupAlignment(); override;
 begin
-  inherited;
-
-  case Self.Mode of
+  case RSClient.Mode of
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
       begin
-        Self.Alignment.Left := [@RootInterface.X2, -157];
-        Self.Alignment.Right := [@RootInterface.X2, -6];
-        Self.Alignment.Top := [@RootInterface.Y1, 8];
-        Self.Alignment.Bottom := [@RootInterface.Y1, 159];
+        Self.Alignment.Left := [RootInterface.X2, -157];
+        Self.Alignment.Right := [RootInterface.X2, -6];
+        Self.Alignment.Top := [RootInterface.Y1, 8];
+        Self.Alignment.Bottom := [RootInterface.Y1, 159];
 
         Self.CompassCircleOffset := [-2, 14];
         Self.XPCircleOffset := [-50, 32];
@@ -515,10 +513,10 @@ begin
 
     ERSClientMode.FIXED:
       begin
-        Self.Alignment.Left := [@RootInterface.X2, -195];
-        Self.Alignment.Right := [@RootInterface.X2,-50];
-        Self.Alignment.Top := [@RootInterface.Y1, 8];
-        Self.Alignment.Bottom := [@RootInterface.Y1, 159];
+        Self.Alignment.Left := [RootInterface.X2, -195];
+        Self.Alignment.Right := [RootInterface.X2,-50];
+        Self.Alignment.Top := [RootInterface.Y1, 8];
+        Self.Alignment.Bottom := [RootInterface.Y1, 159];
 
         Self.CompassCircleOffset := [-8, 12];
         Self.XPCircleOffset := [-50, 26];
@@ -529,6 +527,7 @@ begin
         Self.PolygonOffset := [[21, -71], [39, -62], [55, -49], [67, -32], [70, 0], [66, 19], [57, 32], [41, 43], [20, 58], [12, 71], [0, 74], [-11, 72], [-24, 55], [-47, 39], [-60, 31], [-66, 22], [-71, 0], [-72, -14], [-67, -32], [-55, -49], [-39, -62], [-21, -71], [0, -74]];
       end;
   end;
+  inherited;
 end;
 
 
@@ -1422,6 +1421,7 @@ var
   counts: TIntegerArray;
   p, a, b, q: TPoint;
 begin
+  WriteLn 'FindDotShadows0';
   if not bmp.FindColors(blacks, BLACK) then Exit;
   SetLength(matrix, bmp.getHeight());
   bounds := Box(4, 4, bmp.GetWidth() - 5, bmp.GetHeight() - 5);
@@ -1429,7 +1429,7 @@ begin
 
 
   hi := High(blacks);
-
+  WriteLn 'FindDotShadows1';
   for i := 0 to hi do //First loop to extract 100% sure dot shadows nd mark things in our matrix with educated guesses (ICON, SHADOW, DOT_CENTER)
   begin
     if i = -1 then Break;
@@ -1483,7 +1483,7 @@ begin
     _SetColor([p, a, b, q], SHADOW);
     _SetColor(_GetDotCenter(p), DOT_CENTER);
   end;
-
+  WriteLn 'FindDotShadows2';
   for i := 0 to hi do //Second loop to go through the remaining black pixels and process them
   begin
     p := blacks[i];
@@ -1519,6 +1519,7 @@ begin
     hi := High(blacks);
     i := -1;
   end;
+  WriteLn 'FindDotShadows3';
 end;
 
 (*
@@ -1630,7 +1631,7 @@ function TRSMinimap.GetDots(dots: ERSMinimapDots; box: TBox): TPointArray;
 var
   bmp: TMufasaBitmap;
 begin
-  box.LimitTo(Self.Bounds());
+  box.LimitTo(Self.Bounds);
   bmp.FromClient(box);
 
   Result := Self.GetDotsBitmap(bmp, dots);
@@ -1641,7 +1642,7 @@ end;
 
 function TRSMinimap.GetDots(dots: ERSMinimapDots): TPointArray; overload;
 begin
-  Result := Self.GetDots(dots, Self.Bounds());
+  Result := Self.GetDots(dots, Self.Bounds);
 end;
 
 function TRSMinimap.GetDots(dot: ERSMinimapDot; box: TBox): TPointArray; overload;
@@ -1651,7 +1652,7 @@ end;
 
 function TRSMinimap.GetDots(dot: ERSMinimapDot): TPointArray; overload;
 begin
-  Result := Self.GetDots([dot], Self.Bounds());
+  Result := Self.GetDots([dot], Self.Bounds);
 end;
 
 
@@ -1742,7 +1743,7 @@ function TRSMinimap.GetCleanMinimap(angle: Double = $FFFF): TMufasaBitmap;
 var
   bitmap: TMufasaBitmap;
 begin
-  bitmap := GetMufasaBitmap(BitmapFromClient(Self.Bounds()));
+  bitmap := GetMufasaBitmap(BitmapFromClient(Self.Bounds));
   bitmap.ReplaceColor(0, 1); // We need zero to be unique
 
   Self.CleanMinimap(bitmap);
@@ -1864,20 +1865,17 @@ Global `TRSMinimap` variable.
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  Minimap.SetupAlignment(Self.Mode);
+  Minimap.SetupAlignment();
 end;
 
-procedure TSRL.Setup; override;
+procedure TSRL.Setup(); override;
 begin
   inherited;
-
   Minimap.Setup();
 end;
 
-procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;
+procedure TSRL.Debug(bitmap: TMufasaBitmap); override;
 begin
   inherited;
-
-  Minimap.Draw(Bitmap);
+  Minimap.Draw(bitmap);
 end;

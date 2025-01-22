@@ -18,6 +18,8 @@ if `SRL_USE_REMOTEINPUT_DEBUG` is defined. Debug() calls will drawn on the RS cl
   {$I remoteinput.simba}
 {$ENDIF}
 
+{$SCOPEDENUMS ON}
+
 (*
 ## ERSClientMode
 ```pascal
@@ -37,6 +39,9 @@ type
   TRSClient = record(TSRLBaseRecord)
     Client: ERSClient;
     Mode: ERSClientMode;
+
+    Bounds: TBox;
+    Height, Width: Int32;
 
     {$IFNDEF SRL_DISABLE_REMOTEINPUT}
     RemoteInput: TRemoteInput;
@@ -67,47 +72,42 @@ Are there any other cases where music tab won't be visible?
 *)
 function TRSClient.DetectClientMode(Update: Boolean = False): ERSClientMode;
 var
-  W, H: Int32;
+  width, height: Int32;
   pid: UInt32;
   win: TOSWindow;
   proc: TSysProc;
 begin
   try
-    GetClientDimensions(W, H);
+    GetClientDimensions(width, height);
   except
     pid := GetSimbaTargetPID();
-    WriteLn('TargetPID: ', pid);
-    WriteLn('TargetWin: ', GetSimbaTargetWindow());
-    WriteLn('TargetWin Bounds: ', GetSimbaTargetWindow().GetBounds());
-    WriteLn('Valid? ', IsTargetValid());
+
     for win in GetWindows() do
       if win.GetPID() = pid then
-      begin
-        WriteLn('PID Window: ', win);
-        WriteLn('PID Bounds: ', win.GetBounds());
         Break;
-      end;
 
     for proc in {$H-}GetProcesses(){$H+} do
       if proc.PID = pid then
-      begin
-        WriteLn('PID proccess: ', proc);
         Break;
-      end;
     WriteLn('Please refocus the client!');
     TerminateScript(GetExceptionMessage());
   end;
 
   // Music tab in each mode there are different colors at W-4, H-21
   // Two colors each because tab can be active(red) or not(grey)
-  case GetColor(W-4, H-21) of
+  case GetColor(width-4, height-21) of
     2435372, 658467: Result := ERSClientMode.FIXED;
     3555653, 922425: Result := ERSClientMode.RESIZABLE_MODERN;
     2896180, 790059: Result := ERSClientMode.RESIZABLE_CLASSIC;
   end;
   
   if Update then 
+  begin
     Self.Mode := Result;
+    Self.Width := width;
+    Self.Height := height;
+    Self.Bounds := Box(0, 0, Max(0, width-1), Max(0, height-1));
+  end;
 end;
 
 (*
@@ -137,22 +137,22 @@ WriteLn RSClient.IsLoggedIn();
 *)
 function TRSClient.IsLoggedIn(): Boolean;
 var
-  ClientMode: ERSClientMode := Self.DetectClientMode();
+  clientMode: ERSClientMode;
 begin
-  if (ClientMode <> ERSClientMode.UNKNOWN) and (ClientMode <> Self.Mode) then
+  clientMode := Self.DetectClientMode();
+  if (clientMode <> ERSClientMode.UNKNOWN) and (ClientMode <> Self.Mode) then
   begin
-    Self.Mode := ClientMode;
+    Self.Mode := clientMode;
     Self.ClientModeChanged();
   end;
 
-  Result := ClientMode <> ERSClientMode.UNKNOWN;
+  Result := clientMode <> ERSClientMode.UNKNOWN;
 end;
 
 function TRSClient.IsLoggedIn(waitTime: Int32; interval: Int32 = -1): Boolean; overload;
 begin
   if interval = -1 then
     interval := SRL.TruncatedGauss(50, 1500);
-
   Result := WaitUntil(Self.IsLoggedIn(), interval, waitTime);
 end;
 
@@ -171,7 +171,6 @@ begin
   if RemoteInput.IsSetup() then
   begin
     RemoteInput.LoseFocus();
-    
     Exit;
   end;
   {$ENDIF}
@@ -265,7 +264,7 @@ begin
   Self.RemoteInput.Setup();
   {$ENDIF}
 
-  Self.Mode := Self.DetectClientMode();
+  Self.Mode := Self.DetectClientMode(True);
   if Self.Mode = ERSClientMode.UNKNOWN then
     Self.Mode := ERSClientMode.FIXED; // Fixed as default so we can login if needed
   

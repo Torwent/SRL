@@ -46,17 +46,23 @@ type
 ## type TRSMap
 ```pascal
 TRSMap = record
-  Walker: TRSWalkerV2;
-  Objects: TRSMapObjects;
+    Walker: TRSWalkerV2;
 
-  RegionIndex: Int32;
-  Region: TRSMapRegion;
-  Similarity: Double;
-  Cache: TMatchTemplateRGBCache;
-  Loader: TRSMapLoader;
+    RegionIndex: Int32;
+    Region: TRSMapRegion;
+    Similarity: Double;
+    Cache: TMatchTemplateRGBCache;
+    Loader: TRSMapLoader;
 
-  IsSetup: Boolean;
-end;
+    Sample: TRSMapSample;
+
+    Filters: array of record
+      Box: TBox;
+      Inside: Boolean;
+    end;
+
+    IsSetup, DisableHeightmap: Boolean;
+  end
 ```
 Record responsible for positioning.
 *)
@@ -537,6 +543,7 @@ begin
   cleanMinimap := Minimap.GetCleanMinimap();
 
   tpa := Self.ScaledSearch(cleanMinimap);
+
   for i := 0 to High(tpa) do
   begin
     hit := Self.FullSearch(cleanMinimap, Self.Loader.Map, tpa[i], match);
@@ -547,7 +554,6 @@ begin
       Result := hit;
     end;
   end;
-
   cleanMinimap.Free();
 
   Self.RegionIndex := Self.Loader.LocalIndex(Result);
@@ -561,6 +567,7 @@ begin
     else
       Exit;
   end;
+  WriteLn 'Position3';
 
   Result := [0,0];
 end;
@@ -734,11 +741,8 @@ end;
 *)
 function TRSMap.Map2MM(playerPoint, mapPoint: TPoint; radians: Double): TPoint;
 begin
-  with Minimap.Center() do
-  begin
-    Result := mapPoint - playerPoint + [X, Y];
-    Result := Result.Rotate(radians, [X, Y]);
-  end;
+  Result := mapPoint - playerPoint + [Minimap.Center.X, Minimap.Center.Y];
+  Result := Result.Rotate(radians, [Minimap.Center.X, Minimap.Center.Y]);
 end;
 
 function TRSMap.Map2MM(mapPoint: TPoint): TPoint; overload;
@@ -756,7 +760,7 @@ Converts a point on the minimap to a map coordinate.
 *)
 function TRSMap.MM2Map(playerPoint, minimapPoint: TPoint; radians: Single = $FFFF): TPoint;
 begin
-  Result := playerPoint + minimapPoint - Minimap.Center();
+  Result := playerPoint + minimapPoint - Minimap.Center;
   if (radians = $FFFF) then
     radians := Minimap.GetCompassAngle(False);
   Result := Result.Rotate(-radians, playerPoint);
@@ -810,13 +814,10 @@ var
   radians: Double;
   mapVec: Vector3;
 begin
-  radians    := Minimap.GetCompassAngle(False);
+  radians := Minimap.GetCompassAngle(False);
 
-  with Minimap.Center() do
-  begin
-    mapPoint   := [X, Y] + (mapPoint - playerPoint);
-    mapVec     := Vec3(mapPoint.X,mapPoint.Y).RotateXY(radians, X, Y);
-  end;
+  mapPoint := [Minimap.Center.X, Minimap.Center.Y] + (mapPoint - playerPoint);
+  mapVec := Vec3(mapPoint.X,mapPoint.Y).RotateXY(radians, Minimap.Center.X, Minimap.Center.Y);
 
   Result := Minimap.VectorToMSRect(Vec3(mapVec.x - offset.X, mapVec.y - offset.Y, height), 1, 1, radians);
 end;
@@ -1339,7 +1340,7 @@ begin
 
   bitmap.FromClient();
 
-  b := Minimap.Bounds();
+  b := Minimap.Bounds;
   w := b.Width();
   h := b.Height();
 
@@ -1361,7 +1362,7 @@ begin
 
   bitmap.DrawBitmap(rotated, [b.X1, b.Y1]);
 
-  c := Minimap.Center();
+  c := Minimap.Center;
   z := Minimap.GetZoomRectangle().Expand(4);
   for x := c.X - 25 * 4 to c.X + 25 * 4 with 4 do
     for y := c.Y - 25 * 4 to c.Y + 25 * 4 with 4 do

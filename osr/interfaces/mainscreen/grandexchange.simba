@@ -7,6 +7,8 @@ Methods to interact with the grand exchange.
   {$I SRL-T/osr.simba}
 {$ENDIF}
 
+{$SCOPEDENUMS ON}
+
 type
   ERSGEOverviewButton = (
     CHANGE_TAB,
@@ -297,7 +299,7 @@ var
   yellow : tPointArray;
   toolTips : t2DPointArray;
 begin
-  if SRL.FindColors(Yellow, CTS1(10551295, 0), self.Bounds()) then
+  if SRL.FindColors(Yellow, CTS1(10551295, 0), Self.Bounds) then
   begin
     toolTips := yellow.Cluster(1);
     toolTips.SortByDensity(False);
@@ -317,7 +319,7 @@ end;
 
 procedure TRSGrandExchange.MouseOffSlots();
 begin
-  Mouse.Move(self.Bounds().Expand(5).NearestEdge(Mouse.Position()));
+  Mouse.Move(Self.Bounds.Expand(5).NearestEdge(Mouse.Position()));
 end;
 
 function TRSGrandExchange.GetItemName: String;
@@ -528,7 +530,7 @@ function TRSGrandExchange.ReturnToMain() : Boolean;
     W, H : Int32;
   begin
     arrowColor := CTS2(10791348, 18, 0.11, 0.22);
-    SRL.FindColors(TPA, arrowColor, Self.Bounds());
+    SRL.FindColors(TPA, arrowColor, Self.Bounds);
 
     if length(TPA) = 0 then Exit();
 
@@ -1073,7 +1075,7 @@ function TRSGrandExchange._AbortFromSlot() : Boolean;
     W, H : Int32;
   begin
     abortColor := CTS2(917519, 3, 6.48, 2.52);
-    SRL.FindColors(TPA, AbortColor, Self.Bounds());
+    SRL.FindColors(TPA, AbortColor, Self.Bounds);
 
     if length(TPA) = 0 then Exit();
 
@@ -1365,31 +1367,23 @@ begin
   Self.FINDER_CLERK.MinLongSide := 10;
 end;
 
-procedure TRSGrandExchange.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSGrandExchange.SetupAlignment(); override;
 begin
-  inherited;
+  Self.Alignment.Left := [InterfaceArea.X1];
+  Self.Alignment.Right := [InterfaceArea.X2];
+  Self.Alignment.Bottom := [InterfaceArea.Y2];
+  Self.Alignment.Center.MaxWidth := 484;
+  Self.Alignment.Center.MaxHeight := 304;
 
-  case Self.Mode of
+  case RSClient.Mode of
     ERSClientMode.FIXED:
-      begin
-        Self.Alignment.Left := [@InterfaceArea.X1];
-        Self.Alignment.Right := [@InterfaceArea.X2];
-        Self.Alignment.Top := [@InterfaceArea.Y1];
-        Self.Alignment.Bottom := [@InterfaceArea.Y2];
-        Self.Alignment.Center.MaxWidth := 484;
-        Self.Alignment.Center.MaxHeight := 304;
-      end;
+      Self.Alignment.Top := [InterfaceArea.Y1];
 
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
-      begin
-        Self.Alignment.Left := [@InterfaceArea.X1];
-        Self.Alignment.Right := [@InterfaceArea.X2];
-        Self.Alignment.Top := [@InterfaceArea.Y1, -1];
-        Self.Alignment.Bottom := [@InterfaceArea.Y2];
-        Self.Alignment.Center.MaxWidth := 484;
-        Self.Alignment.Center.MaxHeight := 304;
-      end;
+      Self.Alignment.Top := [InterfaceArea.Y1, -1];
   end;
+
+  inherited;
 end;
 
 var
@@ -1410,23 +1404,20 @@ begin
     Result := inherited();
 end;
 
-procedure TRSClient.ClientModeChanged; override;
+procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  GrandExchange.SetupAlignment(Self.Mode);
+  GrandExchange.SetupAlignment();
 end;
 
-procedure TSRL.Setup; override;
+procedure TSRL.Setup(); override;
 begin
   inherited;
-
   GrandExchange.Setup();
 end;
 
-procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;
+procedure TSRL.Debug(bitmap: TMufasaBitmap); override;
 begin
   inherited;
-
-  GrandExchange.Draw(Bitmap);
+  GrandExchange.Draw(bitmap);
 end;

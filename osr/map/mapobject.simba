@@ -248,7 +248,7 @@ var
 begin
   shouldExit := True;
 
-  if (MainScreen.Mode = ERSClientMode.FIXED) and RSInterface.IsOpen() then
+  if (RSClient.Mode = ERSClientMode.FIXED) and RSInterface.IsOpen() then
     Exit;
 
   if Self.Filter.UpText and Self.Filter.Walker then
@@ -290,7 +290,7 @@ begin
 
   shouldExit := True;
 
-  if (MainScreen.Mode = ERSClientMode.FIXED) and RSInterface.IsOpen() then
+  if (RSClient.Mode = ERSClientMode.FIXED) and RSInterface.IsOpen() then
     Exit;
 
   if Self.Filter.UpText then Self.Walker^.TargetUpText := Copy(Self.UpText);
@@ -759,10 +759,10 @@ function TRSNPCV2.GetCuboidArray(me: TPoint = [0,0]; angle: Single = $FFFF): TCu
   function _GetMinimapGrid(angle: Single): Vector3Array;
   var x, y: Integer;
   begin
-    for x := Minimap.Center().X - 10 * 4 to Minimap.Center().X + 10 * 4 with 4 do
-      for y := Minimap.Center().Y - 10 * 4 to Minimap.Center().Y + 10 * 4 with 4 do
+    for x := Minimap.Center.X - 10 * 4 to Minimap.Center.X + 10 * 4 with 4 do
+      for y := Minimap.Center.Y - 10 * 4 to Minimap.Center.Y + 10 * 4 with 4 do
       begin
-        Result += Vec3(x, y).RotateXY(angle, Minimap.Center().X, Minimap.Center.Y);
+        Result += Vec3(x, y).RotateXY(angle, Minimap.Center.X, Minimap.Center.Y);
       end;
   end;
 
@@ -807,7 +807,7 @@ begin
 
     dots := _DotsToTopLeft(Self, dots, angle);
 
-    dots := dots.Sorted(Minimap.Center());
+    dots := dots.Sorted(Minimap.Center);
     for i := 0 to High(dots) do
     begin
       p := Self.Walker^.MMToMap(me, dots[i], angle); // transfer back from minimap grid to map grid
@@ -831,7 +831,7 @@ begin
   if dots = [] then
     Exit;
 
-  dots := dots.SortFrom(Minimap.Center());
+  dots := dots.SortFrom(Minimap.Center);
   if dots = [] then
     Exit;
 
@@ -937,9 +937,9 @@ begin
 
   for p in mmPoints do
   begin
-    p := p.Rotate(-angle, Minimap.Center());
+    p := p.Rotate(-angle, Minimap.Center);
     p := p.Offset([Round(Self.Offset.X),Round(Self.Offset.Y)]);
-    p := p.Rotate(angle, Minimap.Center());
+    p := p.Rotate(angle, Minimap.Center);
 
     q := [Round(Self.Size.X * 4 / 2), Round(Self.Size.Y * 4 / 2)];
     rect.Top := p.Offset(-q.X, -q.Y);

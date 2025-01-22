@@ -45,10 +45,10 @@ begin
 
   BMP.FromClient();
 
-  for x := Minimap.Center().X - 25 * 4 to Minimap.Center().X + 25 * 4 with 4 do
-    for y := Minimap.Center().Y - 25 * 4 to Minimap.Center().Y + 25 * 4 with 4 do
+  for x := Minimap.Center.X - 25 * 4 to Minimap.Center.X + 25 * 4 with 4 do
+    for y := Minimap.Center.Y - 25 * 4 to Minimap.Center.Y + 25 * 4 with 4 do
     begin
-      tile := Vec3(x, y).RotateXY(angle, Minimap.Center().X, Minimap.Center.Y);
+      tile := Vec3(x, y).RotateXY(angle, Minimap.Center.X, Minimap.Center.Y);
       TPA := Minimap.VectorToMSRect(tile, 1, 1, angle).ToTPA().Connect();
 
       BMP.DrawTPA(TPA, $00FF00);
@@ -165,15 +165,12 @@ roll is the compass angle, by leaving it default it will gather the compass angl
 function TRSMinimap.VectorsToMS(vectors: Vector3Array; roll: Single = $FFFF): TPointArray;
 var
   i: Int32;
-  c: TPoint;
 begin
   if (roll = $FFFF) then
     roll := Self.GetCompassAngle(False);
 
-  c := Self.Center();
-
   for i := 0 to High(vectors) do
-    vectors[i] := vectors[i].RotateXY(PI*2 - roll, c.X, c.Y);
+    vectors[i] := vectors[i].RotateXY(PI*2 - roll, Self.Center.X, Self.Center.Y);
 
   Result := MM2MS.Run(vectors, roll);
 end;
@@ -182,19 +179,17 @@ function TRSMinimap.PointsToMS(points: TPointArray; roll: Single = $FFFF): TPoin
 var
   vectors: Vector3Array;
   i: Int32;
-  c: TPoint;
 begin
   if (roll = $FFFF) then
     roll := Self.GetCompassAngle(False);
 
-  c := Self.Center();
   SetLength(vectors, Length(points));
 
   for i := 0 to High(points) do
   begin
     vectors[i].x := points[i].x;
     vectors[i].y := points[i].y;
-    vectors[i] := vectors[i].RotateXY(PI*2 - roll,  c.X, c.Y);
+    vectors[i] := vectors[i].RotateXY(PI*2 - roll,  Self.Center.X, Self.Center.Y);
   end;
 
   Result := MM2MS.Run(vectors, roll);
@@ -203,7 +198,7 @@ end;
 function TRSMinimap.PointToMS(pt: TPoint; roll: Single = $FFFF): TPoint;
 begin
   if (roll = $FFFF) then roll := Self.GetCompassAngle(False);
-  pt := pt.Rotate(PI*2 - roll, Self.Center());
+  pt := pt.Rotate(PI*2 - roll, Self.Center);
 
   Result := MM2MS.Run([Vec3(pt.x, pt.y)], roll)[0];
 end;
@@ -232,7 +227,7 @@ var
   angle: Double;
 begin
   angle := Self.GetCompassAngle(False);
-  with staticMMPoint.Rotate(angle, Self.Center()) do
+  with staticMMPoint.Rotate(angle, Self.Center) do
     Result := Self.VectorToMS(Vec3(X,Y, height), angle);
 end;
 
@@ -275,7 +270,7 @@ begin
 
   if (roll = $FFFF) then roll := Self.GetCompassAngle(False);
 
-  vector := vector.RotateXY(PI*2 - roll, Self.Center().X, Self.Center().Y);
+  vector := vector.RotateXY(PI*2 - roll, Self.Center.X, Self.Center.Y);
   Arr := MM2MS.Run([Vec3(vector.X-weSize, vector.Y-nsSize, vector.z),
                     Vec3(vector.X+weSize, vector.Y-nsSize, vector.z),
                     Vec3(vector.X+weSize, vector.Y+nsSize, vector.z),
@@ -298,7 +293,7 @@ begin
 
   if (roll = $FFFF) then roll := Self.GetCompassAngle(False);
 
-  pt := pt.Rotate(PI*2 - roll, Self.Center());
+  pt := pt.Rotate(PI*2 - roll, Self.Center);
 
   Arr := MM2MS.Run([Vec3(pt.x-weSize, pt.y-nsSize),
                     Vec3(pt.x+weSize, pt.y-nsSize),
@@ -312,7 +307,7 @@ var
   angle: Double;
 begin
   angle  := Self.GetCompassAngle(False);
-  with staticMMPoint.Rotate(angle, Self.Center()) do
+  with staticMMPoint.Rotate(angle, Self.Center) do
     Result := Self.VectorToMSRect(Vec3(X, Y, height), weSize, nsSize, angle);
 end;
 
@@ -338,7 +333,7 @@ Methods with TRSMainScreenShape parameters allow you do have "tilted" rectangles
 *)
 function TRSMinimap.GetTileMS(loc: TPoint; tile: Vector3 = [1, 1, 0]; offset: Vector3 = [0, 0, 0]; angle: Single = $FFFF): TRectangle;
 begin
-  if not loc.InRange(Minimap.Center(), 90) then Exit; //avoid getting tiles too far away
+  if not loc.InRange(Minimap.Center, 90) then Exit; //avoid getting tiles too far away
 
   if (angle = $FFFF) then
     angle := Self.GetCompassAngle(False);
@@ -351,7 +346,7 @@ end;
 
 function TRSMinimap.GetTileMS(vec: Vector3; tile: Vector3 = [1, 1, 0]; offset: Vector3 = [0, 0, 0]; angle: Single = $FFFF): TRectangle; overload;
 begin
-  if not vec.ToPoint().InRange(Minimap.Center(), 90) then Exit; //avoid getting tiles too far away
+  if not vec.ToPoint().InRange(Minimap.Center, 90) then Exit; //avoid getting tiles too far away
 
   if (angle = $FFFF) then
     angle := Self.GetCompassAngle(False);
@@ -366,7 +361,7 @@ begin
   if (angle = $FFFF) then
     angle := Self.GetCompassAngle(False);
 
-  for loc in locArray.SortFrom(Self.Center()) do
+  for loc in locArray.SortFrom(Self.Center) do
     Result += Self.GetTileMS(loc, tile, offset, angle);
 end;
 
@@ -453,7 +448,7 @@ begin
 
   for i := 0 to High(locArray) do
   begin
-    if not Self.Bounds().Expand(10).Contains(locArray[i]) then
+    if not Self.Bounds.Expand(10).Contains(locArray[i]) then
       Continue;
 
     Result += Self.GetCuboidMSEx(locArray[i], shape, rotations[i], offset, angle)
@@ -469,7 +464,7 @@ begin
 
   for i := 0 to High(locArray) do
   begin
-    if not Self.Bounds().Expand(10).Contains(locArray[i]) then
+    if not Self.Bounds.Expand(10).Contains(locArray[i]) then
       Continue;
 
     Result += Self.GetCuboidMS(locArray[i], shape, offset, angle);
@@ -499,10 +494,10 @@ begin
     Exit(MM2MS.ZoomRectangles[MM2MS.ZoomLevel]);
 
   Result := [
-    MainScreen.PointToMM([MainScreen.X1(), MainScreen.Y1()]).ToPoint(),
-    MainScreen.PointToMM([MainScreen.X2(), MainScreen.Y1()]).ToPoint(),
-    MainScreen.PointToMM([MainScreen.X2(), MainScreen.Y2()]).ToPoint(),
-    MainScreen.PointToMM([MainScreen.X1(), MainScreen.Y2()]).ToPoint()
+    MainScreen.PointToMM([MainScreen.X1, MainScreen.Y1]).ToPoint(),
+    MainScreen.PointToMM([MainScreen.X2, MainScreen.Y1]).ToPoint(),
+    MainScreen.PointToMM([MainScreen.X2, MainScreen.Y2]).ToPoint(),
+    MainScreen.PointToMM([MainScreen.X1, MainScreen.Y2]).ToPoint()
   ];
   MM2MS.ZoomRectangles[MM2MS.ZoomLevel] := Result;
 end;
@@ -575,10 +570,10 @@ var
 begin
   if not Self.IsPointOn(p) then Exit;
 
-  tpa := Self.GetZoomRectangle().ToTPA().SortFrom(Self.Center());
+  tpa := Self.GetZoomRectangle().ToTPA().SortFrom(Self.Center);
   corner := tpa[High(tpa)];
 
-  Result := Self.Center().DistanceTo(P) <= Self.Center().DistanceTo(corner);
+  Result := Self.Center.DistanceTo(P) <= Self.Center.DistanceTo(corner);
 end;
 
 function TRSMinimap.InZoomRange(p: TPoint): Boolean;
@@ -594,12 +589,12 @@ var
   p, corner: TPoint;
   dist: Double;
 begin
-  rect := Self.GetZoomRectangle().ToTPA().SortFrom(Self.Center());
+  rect := Self.GetZoomRectangle().ToTPA().SortFrom(Self.Center);
   corner := tpa[High(rect)];
-  dist := Self.Center().DistanceTo(corner);
+  dist := Self.Center.DistanceTo(corner);
 
   for p in tpa do
-    if Self.Center().DistanceTo(P) <= dist then
+    if Self.Center.DistanceTo(p) <= dist then
       Exit(True);
 end;
 
@@ -621,7 +616,7 @@ function TRSMinimap.GetZoomToPoint(p: TPoint; randomness: Int32 = 0): Int32;
 var
   distance: Double;
 begin
-  distance := p.DistanceTo(Self.Center());
+  distance := p.DistanceTo(Self.Center);
 
   Result := Round((73 - distance) / 0.8);
   Result := Result + randomness;
@@ -663,7 +658,7 @@ end;
 
 function TRSMinimap.MakePointVisible(tpa: TPointArray): Boolean; overload;
 begin
-  Result := Self.MakePointVisible(tpa.SortFrom(Self.Center()));
+  Result := Self.MakePointVisible(tpa.SortFrom(Self.Center));
 end;
 
 
@@ -692,7 +687,6 @@ WriteLn Mainscreen.PointToMM(Point(250,140), 2).ToPoint(); // as a TPoint (lost 
 function TRSMainScreen.PointToMM(MS: TPoint; Height: Int32=0; Accuracy:Double=0.2): Vector3; override;
 var
   a: Double := Minimap.GetCompassAngle(False);
-  mid: TPoint := Minimap.Center();
 
   function FindNearest(Area, Step: Double; FromMM: Vector3; IsFinal: Boolean): Vector3;
   var
@@ -710,7 +704,7 @@ var
       while y <= FromMM.Y+Area do
       begin
         raw += Vector3([x,y,height]);
-        arr += raw[High(raw)].RotateXY(-a, mid.X, mid.Y);
+        arr += raw[High(raw)].RotateXY(-a, Minimap.Center.X, Minimap.Center.Y);
         y += Step;
       end;
       x += Step;
@@ -731,7 +725,7 @@ var
   area: Double;
 begin
   area := 48;
-  Result := FindNearest(area, area, Vec3(mid.X, mid.Y), False);
+  Result := FindNearest(area, area, Vec3(Minimap.Center.X, Minimap.Center.Y), False);
   while area > accuracy do
   begin
     Result := FindNearest(area, area, Result, False);
@@ -821,16 +815,14 @@ Returns a box surrounding our player. Works at any zoom level.
 function TRSMainScreen.GetPlayerBox(): TBox; override;
 var
   a: Double;
-  center: TPoint;
   tpa: TPointArray;
 begin
   if MM2MS.PlayerBoxes[MM2MS.ZoomLevel] <> [] then
     Exit(MM2MS.PlayerBoxes[MM2MS.ZoomLevel]);
 
   a := Minimap.GetCompassAngle(False);
-  center := Minimap.Center();
-  tpa := [Minimap.VectorToMS(Vec3(center.X - 2, center.Y, 10), a),
-          Minimap.VectorToMS(Vec3(center.X + 2, center.Y, -3), a)];
+  tpa := [Minimap.VectorToMS(Vec3(Minimap.Center.X - 2, Minimap.Center.Y, 10), a),
+          Minimap.VectorToMS(Vec3(Minimap.Center.X + 2, Minimap.Center.Y, -3), a)];
 
   Result := tpa.Bounds();
   MM2MS.PlayerBoxes[MM2MS.ZoomLevel] := Result;
@@ -851,7 +843,6 @@ WriteLn Minimap.FacePoint([620, 100]); //keep in mind this example uses a static
 *)
 function TRSMinimap.FacePoint(p: TPoint; randomness: Int32 = 0): Boolean;
 var
-  center: TPoint;
   tpa: TPointArray;
   d1: Double;
   i: Int32;
@@ -860,22 +851,20 @@ begin
 
   tpa := Self.GetZoomRectangle().Totpa();
 
-  if SRL.PointInPoly(p, tpa) then
-    Exit(True);
+  if SRL.PointInPoly(p, tpa) then Exit(True);
 
   tpa := tpa.SortFrom(p);
-
-  center := Self.Center();
   d1 := center.DistanceTo(p);
 
   for i := 0 to High(tpa) do
-    if Result := d1 <= center.DistanceTo(tpa[i]) then
+    if Result := d1 <= Self.Center.DistanceTo(tpa[i]) then
       Break;
 
-  if not Result then
-    Exit;
+  if not Result then Exit;
 
-  Self.SetCompassAngle(center.AngleBetween(tpa[i]) - center.AngleBetween(p) + randomness);
+  Self.SetCompassAngle(
+    Self.Center.AngleBetween(tpa[i]) - Self.Center.AngleBetween(p) + randomness
+  );
 end;
 
 (*

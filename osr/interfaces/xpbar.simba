@@ -34,36 +34,36 @@ This is automatically called on the **XPBar** variable.
 *)
 procedure TRSXPBar.Setup(); override;
 begin
-  inherited;
-
   Self.Name := 'XPBar';
 
   SetLength(Self.Alignments, 3);
 
   with Self.Alignments[0] do
   begin
-    Left := [@InterfaceArea.X1, 2];
-    Right := [@InterfaceArea.X1, 141];
-    Top := [@InterfaceArea.Y1, 23];
-    Bottom := [@InterfaceArea.Y1, 51];
+    Left := [InterfaceArea.X1, 2];
+    Right := [InterfaceArea.X1, 141];
+    Top := [InterfaceArea.Y1, 23];
+    Bottom := [InterfaceArea.Y1, 51];
   end;
 
   with Self.Alignments[1] do
   begin
-    Left   := [@InterfaceArea.X1];
-    Right  := [@InterfaceArea.X2];
-    Top    := [@InterfaceArea.Y1, 23];
-    Bottom := [@InterfaceArea.Y1, 51];
+    Left   := [InterfaceArea.X1];
+    Right  := [InterfaceArea.X2];
+    Top    := [InterfaceArea.Y1, 23];
+    Bottom := [InterfaceArea.Y1, 51];
     Center.MaxWidth := 140;
   end;
 
   with Self.Alignments[2] do
   begin
-    Left := [@InterfaceArea.X2, -141];
-    Right := [@InterfaceArea.X2, -2];
-    Top := [@InterfaceArea.Y1, 0];
-    Bottom := [@InterfaceArea.Y1, 28];
+    Left := [InterfaceArea.X2, -141];
+    Right := [InterfaceArea.X2, -2];
+    Top := [InterfaceArea.Y1, 0];
+    Bottom := [InterfaceArea.Y1, 28];
   end;
+
+  inherited;
 end;
 
 (*
@@ -125,15 +125,14 @@ begin
 
   for Self.Alignment in Self.Alignments do
   begin
-    if SRL.FindColors(tpa, $FFFFFF, Self.Bounds()) > 0 then
+    Self.SetupAlignment();
+    if SRL.FindColors(tpa, $FFFFFF, Self.Bounds) > 0 then
       Break;
-    Self.Cache := [];
   end;
 
   if tpa = [] then
   begin
     Self.Alignment := [];
-    Self.Cache := [];
     Self.Font := [];
     Exit;
   end;
@@ -145,7 +144,6 @@ begin
     else
     begin
       Self.Alignment := [];
-      Self.Cache := [];
       Self.Font := [];
       Exit;
     end;
@@ -176,7 +174,7 @@ begin
   if not Self.IsSetup or not Self.Enable() then
     Exit;
 
-  xpStr := OCR.Recognize(Self.Bounds(), TOCRColorFilter.Create([$FFFFFF]), Self.Font);
+  xpStr := OCR.Recognize(Self.Bounds, TOCRColorFilter.Create([$FFFFFF]), Self.Font);
   Result := xpStr.ExtractInteger(0);
 
   Self.Tracker.IsSetup := (Result > 0) and (Result >= Self.Tracker.Current);
@@ -308,7 +306,7 @@ begin
   Result := inherited;
   if not XPBar.IsSetup then Exit;
 
-  if XPBar.Bounds().Expand(5).Contains(p) then
+  if XPBar.Bounds.Expand(5).Contains(p) then
     Exit(False);
 end;
 
@@ -318,7 +316,7 @@ begin
   if Result and useCenter then Exit;
   if not XPBar.IsSetup then Exit;
 
-  if XPBar.Bounds().Expand(5).ContainsAll(tpa) then
+  if XPBar.Bounds.Expand(5).ContainsAll(tpa) then
     Exit(False);
 end;
 
@@ -327,7 +325,7 @@ begin
   Result := inherited;
   if not XPBar.IsSetup then Exit;
 
-  arr := Result.FilterBox(XPBar.Bounds());
+  arr := Result.FilterBox(XPBar.Bounds);
   Result := Result.Difference(arr);
 end;
 
@@ -335,8 +333,7 @@ end;
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  XPBar.SetupAlignment(Self.Mode);
+  XPBar.SetupAlignment();
 end;
 
 procedure TSRL.Setup(); override;

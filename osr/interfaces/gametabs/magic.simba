@@ -106,7 +106,7 @@ end;
 (*
 ## Magic.SetupAlignment
 ```pascal
-procedure TRSMagic.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSMagic.SetupAlignment(); override;
 ```
 Setups up the interface aligment for the current client mode.
 
@@ -114,14 +114,13 @@ Setups up the interface aligment for the current client mode.
 This is automatically called on the **TRSClient.ClientModeChanged** function.
 ```
 *)
-procedure TRSMagic.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSMagic.SetupAlignment(); override;
 begin
+  Self.Alignment.Left := [GameTab.X1, 0];
+  Self.Alignment.Right := [GameTab.X2, 0];
+  Self.Alignment.Top := [GameTab.Y1, 0];
+  Self.Alignment.Bottom := [GameTab.Y2, 0];
   inherited;
-
-  Self.Alignment.Left := [@GameTab.X1];
-  Self.Alignment.Right := [@GameTab.X2];
-  Self.Alignment.Top := [@GameTab.Y1];
-  Self.Alignment.Bottom := [@GameTab.Y2];
 end;
 
 (*
@@ -215,7 +214,7 @@ WriteLn Magic.IsSpellBook(ERSSpellBook.LUNAR);
 *)
 function TRSMagic.InfoIsOpen(): Boolean;
 begin
-  Result := SRL.CountColor(1731247, GameTab.Bounds()) > 0;
+  Result := SRL.CountColor(1731247, GameTab.Bounds) > 0;
 end;
 
 (*
@@ -249,7 +248,7 @@ var
   p, destination: TPoint;
 begin
   p := Mouse.Position();
-  destination := GameTab.Bounds().Expand(10).NearestEdge(p);
+  destination := GameTab.Bounds.Expand(10).NearestEdge(p);
   Mouse.OnMovingEx := @Self._CloseInfoMouseCallback;
   Mouse.Move(destination);
   Mouse.OnMovingEx := nil;
@@ -283,7 +282,7 @@ begin
   if not Self.IsOpen() then
     Exit;
 
-  Result := SpellFinder.Find([spell], GameTab.Bounds(), match);
+  Result := SpellFinder.Find([spell], GameTab.Bounds, match);
   if Result then
   begin
     b := match.Box.Expand(-1);
@@ -309,20 +308,20 @@ begin
   begin
     if spell in [ERSSpell.LVL1_ENCHANT..ERSSpell.LVL7_ENCHANT] then
     begin
-      if SpellFinder.Find([ERSSpell.BACK], GameTab.Bounds(), match) then
+      if SpellFinder.Find([ERSSpell.BACK], GameTab.Bounds, match) then
         Exit;
 
-      if SpellFinder.Find([ERSSpell.JEWELLERY_ENCHANTMENTS], GameTab.Bounds(), match) then
+      if SpellFinder.Find([ERSSpell.JEWELLERY_ENCHANTMENTS], GameTab.Bounds, match) then
       begin
         Mouse.CLick(match.Box, MOUSE_LEFT);
-        if WaitUntil(SpellFinder.Find([ERSSpell.BACK], GameTab.Bounds(), match), 300, 2000) then
+        if WaitUntil(SpellFinder.Find([ERSSpell.BACK], GameTab.Bounds, match), 300, 2000) then
           Exit(Self.FindSpell(spell, b, attempts-1));
       end;
     end
-    else if SpellFinder.Find([ERSSpell.BACK], GameTab.Bounds(), match) then
+    else if SpellFinder.Find([ERSSpell.BACK], GameTab.Bounds, match) then
       begin
         Mouse.CLick(match.Box, MOUSE_LEFT);
-        WaitUntil(SpellFinder.Find([ERSSpell.JEWELLERY_ENCHANTMENTS], GameTab.Bounds(), match), 300, 2000);
+        WaitUntil(SpellFinder.Find([ERSSpell.JEWELLERY_ENCHANTMENTS], GameTab.Bounds, match), 300, 2000);
       end;
 
     Result := Self.FindSpell(spell, b, attempts-1);
@@ -429,10 +428,9 @@ function TRSMagic.FindSelected(out tpa: TPointArray): Boolean;
 var
   searchBox: TBox;
 begin
-  if not Self.IsOpen() then
-    Exit;
+  if not Self.IsOpen() then Exit;
 
-  searchBox := GameTab.Bounds();
+  searchBox := GameTab.Bounds;
   searchBox.Y2 -= 18;
 
   Result := SRL.FindColors(tpa, $FFFFFF, searchBox) > 10;
@@ -468,7 +466,7 @@ begin
   if not openTab and not Self.IsOpen() then
     Exit(MainScreen.IsUpText('Cast'));
 
-  searchBox := GameTab.Bounds();
+  searchBox := GameTab.Bounds;
   searchBox.Y2 -= 18;
 
   Result := SRL.FindColors(tpa, $FFFFFF, searchBox) > 10;
@@ -620,18 +618,17 @@ procedure TRSMagic.Draw(bitmap: TMufasaBitmap); override;
 var
   book: ERSSpellBook;
 begin
-  if not Self.IsOpen() then
-    Exit;
+  if not Self.IsOpen() then Exit;
 
   inherited();
 
   book := Self.GetSpellBook();
-  bitmap.DrawBox(GameTab.Bounds(), $00FFFF);
+  bitmap.DrawBox(GameTab.Bounds, $00FFFF);
   case book of
-    ERSSpellBook.STANDARD: bitmap.DrawText('Standard book', GameTab.Bounds(), True, $00FFFF);
-    ERSSpellBook.ANCIENT: bitmap.DrawText('Ancient book', GameTab.Bounds(), True, $00FFFF);
-    ERSSpellBook.LUNAR: bitmap.DrawText('Lunar book', GameTab.Bounds(), True, $00FFFF);
-    ERSSpellBook.ARCEUUS: bitmap.DrawText('Arceuus book', GameTab.Bounds(), True, $00FFFF);
+    ERSSpellBook.STANDARD: bitmap.DrawText('Standard book', GameTab.Bounds, True, $00FFFF);
+    ERSSpellBook.ANCIENT: bitmap.DrawText('Ancient book', GameTab.Bounds, True, $00FFFF);
+    ERSSpellBook.LUNAR: bitmap.DrawText('Lunar book', GameTab.Bounds, True, $00FFFF);
+    ERSSpellBook.ARCEUUS: bitmap.DrawText('Arceuus book', GameTab.Bounds, True, $00FFFF);
   end;
 end;
 
@@ -645,20 +642,17 @@ var
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  Magic.SetupAlignment(Self.Mode);
+  Magic.SetupAlignment();
 end;
 
 procedure TSRL.Setup(); override;
 begin
   inherited;
-
   Magic.Setup();
 end;
 
 procedure TSRL.Debug(bitmap: TMufasaBitmap); override;
 begin
   inherited;
-
   Magic.Draw(bitmap);
 end;

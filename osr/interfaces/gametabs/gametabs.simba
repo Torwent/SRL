@@ -8,52 +8,26 @@ Methods to interact with the gametabs.
 {$ENDIF}
 
 type
-  TRSGameTabs = type TRSInterface;
+  TRSGameTabs = record(TRSInterface)
+    TabBoxes: TBoxArray;
+  end;
 
   ERSGameTab = (
-    COMBAT,
-    STATS,
-    QUESTS,
-    INVENTORY,
-    EQUIPMENT,
-    PRAYER,
-    MAGIC,
-    CLAN,
-    FRIENDS,
-    ACCOUNT,
-    LOGOUT,
-    OPTIONS,
-    EMOTES,
-    MUSIC,
-    UNKNOWN
+    COMBAT, STATS, QUESTS, INVENTORY, EQUIPMENT, PRAYER, MAGIC,
+    CLAN, FRIENDS, ACCOUNT, LOGOUT, OPTIONS, EMOTES, MUSIC, UNKNOWN
   );
 
 // Needed because depending on the client width the tabs stack into row(s)
-function TRSGameTabs.Y1(): Int32; override;
-begin
-  Result := inherited;
 
-  if (Self.Mode = ERSClientMode.RESIZABLE_MODERN) and (RootInterface.Width >= 948) then
-    Result += 36;
-end;
-
-// Needed because depending on the client width the tabs stack into row(s)
-function TRSGameTabs.Y2(): Int32; override;
-begin
-  Result := inherited;
-
-  if (Self.Mode = ERSClientMode.RESIZABLE_MODERN) and (RootInterface.Width >= 948) then
-    Result += 36;
-end;
 
 function TRSGameTabs.GetTabBoxes(): TBoxArray;
 var
   i: Int32;
 begin
-  case Self.Mode of
+  case RSClient.Mode of
     ERSClientMode.FIXED, ERSClientMode.RESIZABLE_CLASSIC:
       begin
-        Result := Grid(7, 2, 30, 33, [3, 265], [Self.X1() + 6, Self.Y1() + 1]);
+        Result := Grid(7, 2, 30, 33, [3, 265], [Self.X1 + 6, Self.Y1 + 1]);
       end;
 
     ERSClientMode.RESIZABLE_MODERN:
@@ -61,16 +35,16 @@ begin
         // One row
         if (RootInterface.Width >= 948) then
         begin
-          Result := Grid(14, 1, 30, 33, [3, 0], [Self.X1() - 197, Self.Y2() - 70]);
+          Result := Grid(14, 1, 30, 33, [3, 0], [Self.X1 - 197, Self.Y2 - 70]);
           for I := Ord(ERSGameTab.MUSIC) downto Ord(ERSGameTab.FRIENDS) - 1 do
             Result[i] := Result[i-1];
         end else
         // Two rows
-          Result := Grid(7, 2, 30, 33, [3, 3], [Self.X1(), Self.Y2() - 70]);
+          Result := Grid(7, 2, 30, 33, [3, 3], [Self.X1, Self.Y2 - 70]);
 
         // Logout button is moved to top right corner
         Result[7] := Result[10];
-        Result[10] := [RootInterface.X2() - 19, RootInterface.Y1() + 9, RootInterface.X2() - 10, RootInterface.Y1() + 18];
+        Result[10] := [RootInterface.X2 - 19, RootInterface.Y1 + 9, RootInterface.X2 - 10, RootInterface.Y1 + 18];
       end;
   end;
 end;
@@ -79,7 +53,7 @@ function TRSGameTabs.GetTabBox(tab: ERSGameTab): TBox;
 var
   tabs: TBoxArray;
 begin
-  tabs := Self.GetTabBoxes();
+  tabs := Self.TabBoxes;
   if (tabs = []) or (tab = ERSGameTab.UNKNOWN) then Exit;
   Result := tabs[tab];
 end;
@@ -89,9 +63,9 @@ var
   tabs: TBoxArray;
   i: Int32;
 begin
-  tabs := Self.GetTabBoxes();
+  tabs := Self.TabBoxes;
   
-  if (Self.Mode = ERSClientMode.RESIZABLE_MODERN) and (SRL.CountColor(8639715, tabs[ERSGameTab.LOGOUT]) > 0) then
+  if (RSClient.Mode = ERSClientMode.RESIZABLE_MODERN) and (SRL.CountColor(8639715, tabs[ERSGameTab.LOGOUT]) > 0) then
     Exit(ERSGameTab.LOGOUT);
   
   for i := 0 to High(tabs) do
@@ -142,35 +116,43 @@ begin
   Self.Name := 'GameTabs';
 end;
 
-procedure TRSGameTabs.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSGameTabs.SetupAlignment(); override;
 begin
-  inherited;
-
-  case Self.Mode of
+  case RSClient.Mode of
     ERSClientMode.FIXED:
-      begin
-        Self.Alignment.Left := [@RootInterface.X2, -242];
-        Self.Alignment.Right := [@RootInterface.X2, -2];
-        Self.Alignment.Top := [@RootInterface.Y2, -334];
-        Self.Alignment.Bottom := [@RootInterface.Y2];
-      end;
+    begin
+      Self.Alignment.Left := [RootInterface.X2, -242];
+      Self.Alignment.Right := [RootInterface.X2, -2];
+      Self.Alignment.Top := [RootInterface.Y2, -334];
+    end;
 
     ERSClientMode.RESIZABLE_CLASSIC:
-      begin
-        Self.Alignment.Left := [@RootInterface.X2, -240];
-        Self.Alignment.Right := [@RootInterface.X2];
-        Self.Alignment.Top := [@RootInterface.Y2, -334];
-        Self.Alignment.Bottom := [@RootInterface.Y2];
-      end;
+    begin
+      Self.Alignment.Left := [RootInterface.X2, -240];
+      Self.Alignment.Right := [RootInterface.X2];
+      Self.Alignment.Top := [RootInterface.Y2, -334];
+    end;
 
     ERSClientMode.RESIZABLE_MODERN:
-      begin
-        Self.Alignment.Left := [@RootInterface.X2, -230];
-        Self.Alignment.Right := [@RootInterface.X2];
-        Self.Alignment.Top := [@RootInterface.Y2, -346];
-        Self.Alignment.Bottom := [@RootInterface.Y2];
-      end;
+    begin
+      Self.Alignment.Left := [RootInterface.X2, -230];
+      Self.Alignment.Right := [RootInterface.X2];
+      Self.Alignment.Top := [RootInterface.Y2, -346];
+    end;
   end;
+
+  Self.Alignment.Bottom := [RootInterface.Y2, 0];
+
+  inherited;
+
+  //Needed because depending on the client width the tabs stack into row(s)
+  if (RSClient.Mode = ERSClientMode.RESIZABLE_MODERN) and (RootInterface.Width >= 948) then
+  begin
+    Self.Y1 += 36;
+    Self.Y2 += 36;
+  end;
+
+  Self.TabBoxes := Self.GetTabBoxes();
 end;
 
 var
@@ -179,8 +161,7 @@ var
 procedure TRSClient.ClientModeChanged; override;
 begin
   inherited;
-
-  GameTabs.SetupAlignment(Self.Mode);
+  GameTabs.SetupAlignment();
 end;
 
 procedure TSRL.Setup; override;

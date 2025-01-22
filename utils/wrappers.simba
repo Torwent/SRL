@@ -31,10 +31,10 @@ b := GetClientBounds();
 *)
 function GetClientBounds(): TBox;
 var
-  W, H: Integer;
+  width, height: Integer;
 begin
-  client.GetIOManager().GetDimensions(W,H);
-  Result := TBox([0, 0, Max(0, W-1), Max(0, H-1)])
+  client.GetIOManager().GetDimensions(width, height);
+  Result := TBox([0, 0, Max(0, width-1), Max(0, height-1)]);
 end;
 
 (*

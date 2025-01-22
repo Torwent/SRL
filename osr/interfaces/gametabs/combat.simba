@@ -95,23 +95,21 @@ end;
 (*
 ## Combat.SetupAlignment
 ```pascal
-procedure TRSCombat.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSCombat.SetupAlignment(); override;
 ```
-
 Setups up the interface aligment for the current client mode.
 
 ```{note}
 This is automatically called on the **TRSClient.ClientModeChanged** function.
 ```
 *)
-procedure TRSCombat.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSCombat.SetupAlignment(); override;
 begin
+  Self.Alignment.Left := [GameTab.X1, 0];
+  Self.Alignment.Right := [GameTab.X2, 0];
+  Self.Alignment.Top := [GameTab.Y1, 0];
+  Self.Alignment.Bottom := [GameTab.Y2, 0];
   inherited;
-
-  Self.Alignment.Left := [@GameTab.X1];
-  Self.Alignment.Right := [@GameTab.X2];
-  Self.Alignment.Top := [@GameTab.Y1];
-  Self.Alignment.Bottom := [@GameTab.Y2];
 end;
 
 (*
@@ -342,23 +340,20 @@ end;
 var
   Combat: TRSCombat;
 
-procedure TRSClient.ClientModeChanged; override;
+procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  Combat.SetupAlignment(Self.Mode);
+  Combat.SetupAlignment();
 end;
 
-procedure TSRL.Setup; override;
+procedure TSRL.Setup(); override;
 begin
   inherited;
-
   Combat.Setup();
 end;
 
-procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;
+procedure TSRL.Debug(bitmap: TMufasaBitmap); override;
 begin
   inherited;
-
-  Combat.Draw(Bitmap);
+  Combat.Draw(bitmap);
 end;

@@ -25,7 +25,7 @@ const
   DROP_PATTERN_SPIRAL: TIntegerArray   = [0,1,2,3, 7,11,15,19,23, 27,26,25,24, 20,16,12,8,4, 5, 6,10,14,18,22, 21,17,13,9];
 
 type
-  TRSInventory = record(TRSInterface)
+  TRSInventory = record(TRSItemInterface)
     LOW_SLOT: Int32;
     HIGH_SLOT: Int32;
     ShiftEnabled: Boolean;
@@ -44,17 +44,17 @@ Example:
 Debug(Inventory.GetSlotBoxes());
 ```
 *)
+
 function TRSInventory.GetSlotBoxes(): TBoxArray;
 begin
-  Result := Grid(4, 7, 31, 31, [11, 5], [Self.X1 + 13, Self.Y1 + 9]);
+  Result := Self.SlotBoxes;
 end;
 
 function TRSInventory.GetSlotBox(slot: Int32): TBox;
 begin
   if InRange(slot, 0, Self.HIGH_SLOT) then
-    Result := Self.GetSlotBoxes()[slot];
+    Result := Self.SlotBoxes[slot];
 end;
-
 
 procedure TRSInventory.Setup(); override;
 begin
@@ -63,20 +63,22 @@ begin
   Self.Name := 'Inventory';
   Self.HIGH_SLOT := 27;
 
-  Self.ItemInterface.Name := Self.Name + '.ItemInterface';
-  Self.ItemInterface.GetSearchBoxesFunction := @Self.GetSlotBoxes;
-  Self.ItemInterface.DiscoverOffset := [0, 9, 4, 0];
+  Self.Items.Name := Self.Name + '.Items';
+  Self.Items.SlotBoxesFunction := @Self.GetSlotBoxes;
+  Self.Items.DiscoverOffset := [0, 9, 4, 0];
   Self.ShiftEnabled := True;
 end;
 
-procedure TRSInventory.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSInventory.SetupAlignment(); override;
 begin
+  Self.Alignment.Left := [GameTab.X1, 0];
+  Self.Alignment.Right := [GameTab.X2, 0];
+  Self.Alignment.Top := [GameTab.Y1, 0];
+  Self.Alignment.Bottom := [GameTab.Y2, 0];
+
   inherited;
 
-  Self.Alignment.Left := [@GameTab.X1];
-  Self.Alignment.Right := [@GameTab.X2];
-  Self.Alignment.Top := [@GameTab.Y1];
-  Self.Alignment.Bottom := [@GameTab.Y2];
+  Self.SlotBoxes := Grid(4, 7, 31, 31, [11, 5], [Self.X1 + 13, Self.Y1 + 9]);
 end;
 
 (*
@@ -93,7 +95,7 @@ WriteLn Inventory.IsOpen();
 *)
 function TRSInventory.IsOpen(): Boolean;
 begin
-  Result := (GameTabs.GetCurrentTab() = ERSGameTab.INVENTORY);
+  Result := GameTabs.GetCurrentTab() = ERSGameTab.INVENTORY;
 end;
 
 (*
@@ -135,7 +137,7 @@ WriteLn(Slot); // 15
 *)
 function TRSInventory.PointToSlot(p: TPoint): Int32;
 begin
-  Result := Self.ItemInterface.PointToSlot(p);
+  Result := Self.Items.PointToSlot(p);
 end;
 
 (*
@@ -153,7 +155,7 @@ if Inventory.HoverSlot(1) then
 *)
 function TRSInventory.MouseSlot(slot: Int32): Boolean;
 begin
-  Result := Self.ItemInterface.MouseSlot(slot);
+  Result := Self.Items.MouseSlot(slot);
 end;
 
 
@@ -178,7 +180,7 @@ if Inventory.ClickSlot(1, 'Drop') then
 *)
 function TRSInventory.ClickSlot(slot: Int32; option: String = ''): Boolean;
 begin
-  Result := Self.ItemInterface.InteractSlot(slot, option);
+  Result := Self.Items.InteractSlot(slot, option);
 end;
 
 function TRSInventory.IsSlotUsed(b: TBox): Boolean; overload;
@@ -239,7 +241,7 @@ var
 begin
   if not Self.Open() then
     Exit(-1);
-  if SRL.FindColors(tpa, $FFFFFF, Self.Bounds()) = 0 then
+  if SRL.FindColors(tpa, $FFFFFF, Self.Bounds) = 0 then
     Exit(-1);
 
   atpa := tpa.Cluster(1);
@@ -370,12 +372,9 @@ end;
 
 procedure TRSInventory.Draw(Bitmap: TMufasaBitmap); override;
 begin
-  if not Self.IsOpen() then
-    Exit;
-
+  if not Self.IsOpen() then Exit;
   inherited();
-
-  Bitmap.DrawBoxes(Self.GetSlotBoxes(), $00FFFF);
+  Bitmap.DrawBoxes(Self.SlotBoxes, $00FFFF);
 end;
 
 (*
@@ -400,31 +399,31 @@ function TRSInventory.Count(): Int32;
 begin
   if not Self.Open() then
     Exit;
-  Result := Self.ItemInterface.Count();
+  Result := Self.Items.Count();
 end;
 
 function TRSInventory.CountItem(item: TRSItem): Int32;
 begin
   if Self.Open() then
-    Result := Self.ItemInterface.Count(item);
+    Result := Self.Items.Count(item);
 end;
 
 function TRSInventory.CountItems(items: TRSItemArray): Int32;
 begin
   if Self.Open() then
-    Result := Self.ItemInterface.Count(items);
+    Result := Self.Items.Count(items);
 end;
 
 function TRSInventory.CountItemStack(item: TRSItem): Int32;
 begin
   if Self.Open() then
-    Result := Self.ItemInterface.CountStack(item);
+    Result := Self.Items.CountStack(item);
 end;
 
 function TRSInventory.CountSlotStack(slot: Int32): Int32;
 begin
   if Self.Open() then
-    Result := Self.ItemInterface.CountStack(slot);
+    Result := Self.Items.CountStack(slot);
 end;
 
 
@@ -483,7 +482,7 @@ WriteLn(Slot);
 *)
 function TRSInventory.RandomSlotNearby(slot: Int32; slots: TIntegerArray): Int32;
 begin
-  Result := Self.ItemInterface.RandomSlotNearby(slot, slots);
+  Result := Self.Items.RandomSlotNearby(slot, slots);
 end;
 
 
@@ -509,7 +508,7 @@ function TRSInventory.FindItems(items: TRSItemArray; out slots: TIntegerArray): 
 begin
   if not Self.Open() then
     Exit;
-  slots := Self.ItemInterface.IndicesOf(items);
+  slots := Self.Items.IndicesOf(items);
   Result := Length(slots) > 0;
 end;
 
@@ -547,7 +546,7 @@ begin
   slot := -1;
   if not Self.Open() then
     Exit;
-  slot := Self.ItemInterface.IndexOf([item]);
+  slot := Self.Items.IndexOf([item]);
   Result := slot <> -1;
 end;
 
@@ -570,17 +569,17 @@ WriteLn Inventory.ContainsAll(['Shark', 'Lobster', 'Tuna']);
 *)
 function TRSInventory.ContainsAny(items: TRSItemArray): Boolean;
 begin
-  Result := Self.Open() and Self.ItemInterface.ContainsAny(items);
+  Result := Self.Open() and Self.Items.ContainsAny(items);
 end;
 
 function TRSInventory.ContainsItem(item: TRSItem): Boolean;
 begin
-  Result := Self.Open() and Self.ItemInterface.Contains(item);
+  Result := Self.Open() and Self.Items.Contains(item);
 end;
 
 function TRSInventory.ContainsAll(items: TRSItemArray): Boolean;
 begin
-  Result := Self.Open() and Self.ItemInterface.ContainsAll(items);
+  Result := Self.Open() and Self.Items.ContainsAll(items);
 end;
 
 
@@ -605,17 +604,17 @@ WriteLn Inventory.Discover(0);
 *)
 function TRSInventory.DiscoverAllEx(): array of TRSItemArray;
 begin
-  Result := Self.ItemInterface.DiscoverAllEx();
+  Result := Self.Items.DiscoverAllEx();
 end;
 
 function TRSInventory.DiscoverAll(): TRSItemArray;
 begin
-  Result := Self.ItemInterface.DiscoverAll();
+  Result := Self.Items.DiscoverAll();
 end;
 
 function TRSInventory.Discover(slot: Int32): TRSItemArray;
 begin
-  Result := Self.ItemInterface.Discover(slot);
+  Result := Self.Items.Discover(slot);
 end;
 
 
@@ -636,7 +635,7 @@ function TRSInventory.MouseItem(item: TRSItem): Boolean;
 begin
   if not Self.Open() then
     Exit;
-  Result := Self.ItemInterface.MouseItem(item);
+  Result := Self.Items.MouseItem(item);
 end;
 
 (*
@@ -658,7 +657,7 @@ begin
   if not Self.Open() then
     Exit;
 
-  Result := Self.ItemInterface.InteractItem(item, option);
+  Result := Self.Items.InteractItem(item, option);
 end;
 
 (*
@@ -730,7 +729,6 @@ Inventory.ShiftDrop(['Maple logs', 'Willow logs'], DROP_PATTERN_SNAKE);
 *)
 function TRSInventory.RightClickDrop(slots: TIntegerArray): Boolean;
 var
-  boxes: TBoxArray;
   b: TBox;
   i, j, attempts: Int32;
   selected: Int32;
@@ -739,15 +737,13 @@ begin
   if (Length(slots) = 0) then
     Exit(True);
 
-  boxes := Self.GetSlotBoxes();
-
   for attempts := 1 to 5 do
   begin
     i := 0;
 
     for i := 0 to High(slots) do
     begin
-      b := boxes[slots[i]];
+      b := Self.SlotBoxes[slots[i]];
       selected := Self.GetSelectedSlot();
       if (selected > -1) then
       begin
@@ -798,7 +794,6 @@ end;
 
 function TRSInventory.ShiftDrop(slots: TIntegerArray): Boolean;
 var
-  boxes: TBoxArray;
   box: TBox;
   i, j, attempts: Int32;
   selected: Int32;
@@ -810,7 +805,6 @@ begin
     Exit(Self.RightClickDrop(slots));
 
   Keyboard.IsKeyDown(VK_SHIFT); // Clear cache
-  boxes := Self.GetSlotBoxes();
 
   try
     for attempts := 1 to 5 do
@@ -819,7 +813,7 @@ begin
 
       while (i < Length(slots)) do
       begin
-        box := boxes[slots[i]];
+        box := Self.SlotBoxes[slots[i]];
         selected := Self.GetSelectedSlot();
         if (selected > -1) then
         begin
@@ -890,8 +884,7 @@ Global TRSInventory variable.
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  Inventory.SetupAlignment(Self.Mode);
+  Inventory.SetupAlignment();
 end;
 
 procedure TSRL.Setup(); override;

@@ -40,19 +40,18 @@ end;
 (*
 ## Make.SetupAlignment
 ```pascal
-procedure TRSMake.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSMake.SetupAlignment(); override;
 ```
 Internal method automatically called by SRL on startup used to setup the interface coordinates.
 You will probably never need to use this directly.
 *)
-procedure TRSMake.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSMake.SetupAlignment(); override;
 begin
+  Self.Alignment.Left   := [Chat.X1, 0];
+  Self.Alignment.Right  := [Chat.X2, 0];
+  Self.Alignment.Top    := [Chat.Y1, 0];
+  Self.Alignment.Bottom := [Chat.Y2, 0];
   inherited;
-
-  Self.Alignment.Left := [@Chat.X1];
-  Self.Alignment.Right := [@Chat.X2];
-  Self.Alignment.Top := [@Chat.Y1];
-  Self.Alignment.Bottom := [@Chat.Y2];
 end;
 
 
@@ -146,7 +145,7 @@ function TRSMake.FindHint(): TPointArray;
 const
   HINT_COLOR = $A0FFFF;
 begin
-  FindColors(Result, HINT_COLOR, Self.Bounds());
+  FindColors(Result, HINT_COLOR, Self.Bounds);
 end;
 
 (*
@@ -166,7 +165,7 @@ var
   b: TBox;
   tmp: TPointArray;
 begin
-  Result := Self.Bounds().ToRectangle().ToTPA().Connect();
+  Result := Self.Rectangle.ToTPA().Connect();
   Result.Fill();
 
   for b in Self.GetItemButtons().ToBoxes() do
@@ -192,7 +191,6 @@ const
   ENABLED_COLOR = $FFFFFF;
   DISABLED_COLOR = $203040;
 var
-  bounds: TBox;
   p: TPoint;
   hintPoint: TPoint;
   hint: TBox;
@@ -201,9 +199,8 @@ var
   Button: TRSButton;
   Buttons: TRSButtonArray;
 begin
-  bounds := Self.Bounds();
   hint := Self.FindHint().Bounds().Expand(1); //Expand(1) because of the border
-  p := [bounds.X2 - 193, bounds.Y1 + 44];
+  p := [Self.Bounds.X2 - 193, Self.Bounds.Y1 + 44];
 
   hintPoint := [hint.X2, hint.Y1];
   if (hintPoint.X > p.X) and (hintPoint.Y < p.Y) then
@@ -392,8 +389,7 @@ var
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  Make.SetupAlignment(Self.Mode);
+  Make.SetupAlignment();
 end;
 
 procedure TSRL.Setup(); override;

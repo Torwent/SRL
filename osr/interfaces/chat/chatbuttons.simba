@@ -76,7 +76,7 @@ procedure TRSChatButtons.Draw(Bitmap: TMufasaBitmap); override;
 var
   buttons: TRSButtonArray;
 begin
-  bitmap.DrawBox(Self.Bounds(), $00FFFF);
+  bitmap.DrawBox(Self.Bounds, $00FFFF);
   buttons := Self.GetButtons();
   buttons.Draw(bitmap);
 end;
@@ -85,18 +85,16 @@ end;
 procedure TRSChatButtons.Setup; override;
 begin
   inherited;
-
   Self.Name := 'Chat Buttons';
 end;
 
-procedure TRSChatButtons.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSChatButtons.SetupAlignment(); override;
 begin
+  Self.Alignment.Left := [RootInterface.X1, 0];
+  Self.Alignment.Right := [RootInterface.X1, 518];
+  Self.Alignment.Top := [RootInterface.Y2, -22];
+  Self.Alignment.Bottom := [RootInterface.Y2, 0];
   inherited;
-
-  Self.Alignment.Left := [@RootInterface.X1];
-  Self.Alignment.Right := [@RootInterface.X1, 518];
-  Self.Alignment.Top := [@RootInterface.Y2, -22];
-  Self.Alignment.Bottom := [@RootInterface.Y2];
 end;
 
 
@@ -164,29 +162,23 @@ begin
   Result := Self.GetState(Button) = State;
 end;
 
-
-
-
 var
   ChatButtons: TRSChatButtons;
 
-procedure TRSClient.ClientModeChanged; override;
+procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  ChatButtons.SetupAlignment(Self.Mode);
+  ChatButtons.SetupAlignment();
 end;
 
-procedure TSRL.Setup; override;
+procedure TSRL.Setup(); override;
 begin
   inherited;
-
   ChatButtons.Setup();
 end;
 
-procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;
+procedure TSRL.Debug(bitmap: TMufasaBitmap); override;
 begin
   inherited;
-
-  ChatButtons.Draw(Bitmap);
+  ChatButtons.Draw(bitmap);
 end;

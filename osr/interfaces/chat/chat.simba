@@ -32,13 +32,15 @@ const
     CHAT_COLOR_GREEN
   ];
 
-const
   CHAT_MESSAGE_LINES = [0..7];
   CHAT_INPUT_LINE = 8;
 
 type
-  TRSChat = type TRSInterface;
   ERSIronManType = (NONE, IRONMAN, HARDCORE, ULTIMATE, GROUP, HARCORE_GROUP, UNRANKED_GROUP);
+
+  TRSChat = record(TRSInterface)
+    LineBoxes: TBoxArray;
+  end;
 
 (*
 ## Chat.Setup
@@ -57,29 +59,32 @@ begin
   inherited;
 
   Self.Name := 'Chatbox';
-  Self.GetScrollAreaFunction := @Self.Bounds;
 end;
 
 (*
 ## Chat.SetupAlignment
 ```pascal
-procedure TRSChat.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSChat.SetupAlignment(); override;
 ```
-
 Setups up the interface aligment for the current client mode.
 
 ```{note}
 This is automatically called on the **TRSClient.ClientModeChanged** function.
 ```
 *)
-procedure TRSChat.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSChat.SetupAlignment(); override;
 begin
+  Self.Alignment.Left := [ChatButtons.X1, 0];
+  Self.Alignment.Right := [ChatButtons.X2, 0];
+  Self.Alignment.Top := [ChatButtons.Y1, -142];
+  Self.Alignment.Bottom := [ChatButtons.Y1, -1];
+
   inherited;
 
-  Self.Alignment.Left := [@ChatButtons.X1];
-  Self.Alignment.Right := [@ChatButtons.X2];
-  Self.Alignment.Top := [@ChatButtons.Y1, -142];
-  Self.Alignment.Bottom := [@ChatButtons.Y1, -1];
+  Self.ScrollArea := Self.Bounds;
+
+  Self.LineBoxes := Grid(1, 9, Self.Width - 35, 13, [0, 1], [Self.X1 + 10, Self.Y1 + 8]);
+  Self.LineBoxes[CHAT_INPUT_LINE].Y2 += 2;
 end;
 
 procedure TRSChat.Draw(Bitmap: TMufasaBitmap); override;
@@ -89,21 +94,7 @@ begin
 
   inherited;
 
-  Bitmap.DrawBoxes(Self.GetLineBoxes(), $00FFFF);
-end;
-
-(*
-## Chat.GetLineBoxes
-```pascal
-function TRSChat.GetLineBoxes: TBoxArray;
-```
-
-Internal function that returns the bounds of the chat lines.
-*)
-function TRSChat.GetLineBoxes(): TBoxArray;
-begin
-  Result := Grid(1, 9, Width - 35, 13, [0, 1], [Self.X1 + 10, Self.Y1 + 8]);
-  Result[CHAT_INPUT_LINE].Y2 += 2;
+  Bitmap.DrawBoxes(Self.LineBoxes, $00FFFF);
 end;
 
 
@@ -122,7 +113,7 @@ function TRSChat.GetDisplayNameBox(colors: TIntegerArray = [$FFFFFF, $000000]; o
 var
   tpa: TPointArray;
 begin
-  Result := Self.GetLineBoxes()[CHAT_INPUT_LINE];
+  Result := Self.LineBoxes[CHAT_INPUT_LINE];
   for color in colors do
     if SRL.FindColors(tpa, color, Result) then
       Exit(tpa.Bounds());
@@ -137,7 +128,7 @@ end;
 
 function TRSChat.GetIronManType() : ERSIronManType;
 const
-    NAME_LINE_BOX : TBox := Self.GetLineBoxes()[CHAT_INPUT_LINE];
+    NAME_LINE_BOX : TBox := Self.LineBoxes[CHAT_INPUT_LINE];
 begin
   //If Ironman Grey then we're at least a regular Ironman. Check for the accent of the other Ironman types.
   if SRL.CountColor(CTS2(5262159, 9, 4.91, 0.28), NAME_LINE_BOX) > 1 then
@@ -176,9 +167,8 @@ var
 begin
   for Color in Colors do
   begin
-    Result := OCR.RecognizeStatic(Self.GetLineBoxes()[CHAT_INPUT_LINE], TOCRColorFilter.Create([Color]), RS_FONT_PLAIN_12);
-    if Result <> '' then
-      Break;
+    Result := OCR.RecognizeStatic(Self.LineBoxes[CHAT_INPUT_LINE], TOCRColorFilter.Create([Color]), RS_FONT_PLAIN_12);
+    if Result <> '' then Break;
   end;
 
   if ':' in Result then
@@ -237,7 +227,7 @@ WriteLn Chat.GetQuery;
 *)
 function TRSChat.GetQuery(): String;
 begin
-  Result := OCR.Recognize(Self.Bounds(), TOCRColorFilter.Create([$000000]), RS_FONT_BOLD_12);
+  Result := OCR.Recognize(Self.Bounds, TOCRColorFilter.Create([$000000]), RS_FONT_BOLD_12);
 end;
 
 (*
@@ -255,7 +245,7 @@ WriteLn Chat.GetQueryAnswer;
 *)
 function TRSChat.GetQueryAnswer(): String;
 begin
-  Result := OCR.Recognize(Self.Bounds(), TOCRColorFilter.Create([8388608]), RS_FONT_BOLD_12);
+  Result := OCR.Recognize(Self.Bounds, TOCRColorFilter.Create([8388608]), RS_FONT_BOLD_12);
 end;
 
 (*
@@ -320,13 +310,13 @@ function TRSChat.GetOptions(Colors: TIntegerArray = [CHAT_COLOR_BLACK, CHAT_COLO
 
 Internal function to retrieve the currently available chat options.
 *)
-function TRSChat.GetOptions(Colors: TIntegerArray = [CHAT_COLOR_BLACK, CHAT_COLOR_WHITE]): TRSChatboxOptionArray; 
+function TRSChat.GetOptions(colors: TIntegerArray = [CHAT_COLOR_BLACK, CHAT_COLOR_WHITE]): TRSChatboxOptionArray;
 var
   Strings: TStringArray;
   Boxes: TBoxArray;
   I, Key: Int32;
 begin
-  Strings := OCR.RecognizeLines(Self.Bounds(), TOCRColorFilter.Create(Colors), RS_FONT_QUILL_8, Boxes);
+  Strings := OCR.RecognizeLines(Self.Bounds, TOCRColorFilter.Create(colors), RS_FONT_QUILL_8, Boxes);
 
   SetLength(Result, Length(Strings));
   for I := 0 to High(Result) do
@@ -450,34 +440,34 @@ Example:
 WriteLn Chat.GetMessage(5);
 ```
 *)
-function TRSChat.GetMessage(Line: Int32; Colors: TIntegerArray = CHAT_MESSAGE_COLORS): String; 
+function TRSChat.GetMessage(line: Int32; colors: TIntegerArray = CHAT_MESSAGE_COLORS): String;
 const
-  StaticOffset = 2; // Make static text placement so RecognizeStatic can be used
+  STATIC_OFFSET = 2; // Make static text placement so RecognizeStatic can be used
 var
-  B: TBox;
-  X: Int32;
-  Transparent: Boolean;
-  Matrix: T2DIntegerArray;
+  b: TBox;
+  x: Int32;
+  transparent: Boolean;
+  matrix: T2DIntegerArray;
 begin
-  B := GetLineBoxes()[Line];
-  B.Y1 -= StaticOffset; 
+  b := Self.LineBoxes[line];
+  b.Y1 -= STATIC_OFFSET;
   
-  Transparent := Self.IsTransparent();
-  if Transparent then
-    Colors.Remove(CHAT_COLOR_BLACK, True);
+  transparent := Self.IsTransparent();
+  if transparent then
+    colors.Remove(CHAT_COLOR_BLACK, True);
   
-  if (Length(Colors) > 0) then
+  if (Length(colors) > 0) then
   begin
-    Matrix := GetColorsMatrix(B.X1, B.Y1, B.X2, B.Y2);
+    matrix := GetColorsMatrix(b.X1, b.Y1, b.X2, b.Y2);
     
     // Shadow from above line draws over our line.
     // Mark the shadow as a match since OCR requires 100% character match.
-    if Transparent then
-      for X := 0 to High(Matrix[StaticOffset]) do
-        if (Matrix[StaticOffset][X] = CHAT_COLOR_BLACK) theN
-          Matrix[StaticOffset][X] := Colors[0];
+    if transparent then
+      for x := 0 to High(matrix[STATIC_OFFSET]) do
+        if (matrix[STATIC_OFFSET, x] = CHAT_COLOR_BLACK) theN
+          matrix[STATIC_OFFSET, x] := colors[0];
   
-    Result := OCR._RecognizeStatic(Matrix, TOCRColorFilter.Create(Colors), RS_FONT_PLAIN_12);
+    Result := OCR._RecognizeStatic(matrix, TOCRColorFilter.Create(colors), RS_FONT_PLAIN_12);
   end;
 end;
 
@@ -583,8 +573,7 @@ var
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  Chat.SetupAlignment(Self.Mode);
+  Chat.SetupAlignment();
 end;
 
 procedure TSRL.Setup(); override;

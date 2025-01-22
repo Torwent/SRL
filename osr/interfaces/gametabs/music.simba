@@ -43,34 +43,30 @@ begin
   FreeHTTPClient(http)
 end;
 
-procedure TRSMusicPlayer.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSMusicPlayer.SetupAlignment(); override;
 begin
+  Self.Alignment.Left := [GameTab.X1, 0];
+  Self.Alignment.Right := [GameTab.X2, 0];
+  Self.Alignment.Top := [GameTab.Y1, 0];
+  Self.Alignment.Bottom := [GameTab.Y2, 0];
+
   inherited;
 
-  Self.Alignment.Left := [@GameTab.X1];
-  Self.Alignment.Right := [@GameTab.X2];
-  Self.Alignment.Top := [@GameTab.Y1];
-  Self.Alignment.Bottom := [@GameTab.Y2];
+  Self.ScrollArea := Self.Bounds;
+  Self.ScrollArea.Y1 += 55;
+  Self.ScrollArea.Y2 -= 15;
 end;
 
-function TRSMusicPlayer.ScrollAreaFunction(): TBox;
-begin
-  Result := Self.Bounds();
-  Result.Y1 += 55;
-  Result.Y2 -= 15;
-end;
 
 procedure TRSMusicPlayer.Setup(); override;
 begin
   inherited;
-
   Self.Name := 'MusicPlayer';
-  Self.GetScrollAreaFunction := @Self.ScrollAreaFunction;
 end;
 
 function TRSMusicPlayer.IsOpen(): Boolean;
 begin
-  Result := (GameTabs.GetCurrentTab = ERSGameTab.MUSIC);  // Assuming the music tab constant is ERSGameTab.MUSIC
+  Result := GameTabs.GetCurrentTab() = ERSGameTab.MUSIC;  // Assuming the music tab constant is ERSGameTab.MUSIC
 end;
 
 function TRSMusicPlayer.Open(): Boolean;
@@ -97,14 +93,11 @@ var
   boxes: TBoxArray;
   foundText: String;
 begin
-
-
-  if SRL.FindColors(tpa, CTS2(901389, 1, 0.01, 0.01), Self.Bounds()) < 1 then
+  if SRL.FindColors(tpa, CTS2(901389, 1, 0.01, 0.01), Self.Bounds) < 1 then
     Exit;
 
   boxes := tpa.Cluster(15, 1).ToTBA();
   Result:=foundText := OCR.Recognize(boxes[0], TOCRColorFilter.Create([901389]), RS_FONT_PLAIN_12);
-
 end;
 
 function FindTrackIndex(const trackName: String; const trackList: array of String): Int32;
@@ -125,6 +118,7 @@ begin
     end;
   end;
 end;
+
 function TRSMusicPlayer.LocateTrack(trackName: String): TBox;
 var
   tpa: TPointArray;
@@ -150,7 +144,7 @@ begin
 
   repeat
     // Find potential matches for the track name on the screen
-    if SRL.FindColors(tpa, [901389,16777215], Self.ScrollAreaFunction()) > 0 then
+    if SRL.FindColors(tpa, [901389,16777215], Self.ScrollArea) > 0 then
     begin
       boxes := tpa.Cluster(9, 1).ToTBA();
       // Loop through found boxes and check if the text matches the trackName
@@ -191,29 +185,28 @@ begin
   Self.DebugLn('Track not found or playing: ' + trackName);
   Exit(False);
 end;
+
 var
   MusicPlayer: TRSMusicPlayer;
 
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-
-  MusicPlayer.SetupAlignment(Self.Mode);
+  MusicPlayer.SetupAlignment();
 end;
 
 procedure TSRL.Setup(); override;
 begin
   inherited;
-
-  MusicPlayer.Setup;
+  MusicPlayer.Setup();
 end;
 
 procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;
 begin
   inherited;
-
   MusicPlayer.Draw(Bitmap);
 end;
+
 procedure TRSInterface.SetScrollPosition_Mouse(value: Int32);
 var
   scrollBar: TRSScrollBar;
@@ -245,7 +238,7 @@ begin
   waituntil ((self.getscrollposition = value),100,5000); // Sleep for 100 milliseconds to allow the interface to update
 end;
 
-Function TRSMusicPlayer.PlayRandomTrack(): Boolean;
+function TRSMusicPlayer.PlayRandomTrack(): Boolean;
 var
   randomIndex: Integer;
   trackName: String;

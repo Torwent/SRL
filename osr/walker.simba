@@ -124,7 +124,7 @@ end;
 
 function TRSWalkerV2.PointToMM(playerPoint, p: TPoint; radians: Double): TPoint;
 begin
-  with Minimap.Center() do
+  with Minimap.Center do
   begin
     Result := p - playerPoint + [X, Y];
     Result := Result.Rotate(radians, [X, Y]);
@@ -135,7 +135,7 @@ function TRSWalkerV2.PointToMMVec(playerPoint, p: TPoint; radians: Double): Vect
 var
   MMpoint: TPoint;
 begin
-  with Minimap.Center() do
+  with Minimap.Center do
   begin
     MMPoint := p - playerPoint + [X, Y];
     Result := Vec3(MMPoint.X,MMPoint.Y).RotateXY(radians, X, Y);
@@ -146,7 +146,7 @@ function TRSWalkerV2.PointsToMM(playerPoint: TPoint; tpa: TPointArray; radians: 
 var
   p: TPoint;
 begin
-  with Minimap.Center() do
+  with Minimap.Center do
     for p in tpa do
     begin
       p := p - playerPoint + [X, Y];
@@ -190,7 +190,7 @@ begin
   if radians = $FFFF then
     radians := Minimap.GetCompassAngle(False);
 
-  with Minimap.Center() do
+  with Minimap.Center do
   begin
     mapPoint   := [X, Y] + (mapPoint - playerPoint);
     mapVec     := Vec3(mapPoint.X,mapPoint.Y).RotateXY(radians, X, Y);
@@ -201,7 +201,7 @@ end;
 
 function TRSWalkerV2.MMToMap(playerPoint, minimapPoint: TPoint; radians: Single = $FFFF): TPoint;
 begin
-  Result := playerPoint + minimapPoint - Minimap.Center();
+  Result := playerPoint + minimapPoint - Minimap.Center;
   if (radians = $FFFF) then
     radians := Minimap.GetCompassAngle(False);
   Result := Result.Rotate(-radians, playerPoint);
@@ -316,7 +316,7 @@ var
 
     if (Idx = High(Self._Path)) and (Random(10) > 2) then Exit();
 
-    mmPos := Self._Path[idx] - myPos + minimap.Center();
+    mmPos := Self._Path[idx] - myPos + Minimap.Center;
     mmPos := mmPos.Rotate(angle, Minimap.Center);
 
     if Self.ScreenWalk then
@@ -338,7 +338,7 @@ begin
     if (GetTimeRunning() < Self.MouseAheadTimer) or (not Minimap.FindFlag(Flag)) then
       Exit();
 
-  dist := Trunc(flag.DistanceTo(Minimap.Center()));
+  dist := Trunc(flag.DistanceTo(Minimap.Center));
   if System.InRange(dist, Random(5,10), Random(60,70)) then
     MouseToNextPoint(position);
 
@@ -565,7 +565,7 @@ begin
   if not Self.WalkStepHelper(playerPoint, walkerPoint, minimapPoint) then
     Exit(not Self.Walking);
 
-  if (Minimap.Center().DistanceTo(minimapPoint) < 4) then
+  if (Minimap.Center.DistanceTo(minimapPoint) < 4) then
     Exit(True);
 
   h := Self.Height(playerPoint);
@@ -624,16 +624,16 @@ begin
   if not Self.WalkStepHelper(playerPoint, walkerPoint, minimapPoint) then
     Exit(not Self.Walking);
 
-  if (Minimap.Center().DistanceTo(minimapPoint) < 4) then
+  if (Minimap.Center.DistanceTo(minimapPoint) < 4) then
     Exit(True);
 
   Result := Self.Click(minimapPoint, Self.ClickRandomness);
   if Result then
   begin
     if (Random() < 0.15) then // 15% chance of randomness else mean
-      waitUntilDistance := Random(Distance(Minimap.Center(), minimapPoint))
+      waitUntilDistance := Random(Distance(Minimap.Center, minimapPoint))
     else
-      waitUntilDistance := SRL.NormalRange(0, Distance(Minimap.Center(), minimapPoint) + 10);
+      waitUntilDistance := SRL.NormalRange(0, Distance(Minimap.Center, minimapPoint) + 10);
 
     if Self._DoorHandler.Handling then
     begin
@@ -691,7 +691,7 @@ begin
   b := Minimap.VectorToMSRect([mmPoint.X, mmPoint.Y, diff], 1, 1, angle).Bounds();
 
   if MainScreen.IsVisible(b.Middle) then
-    Result := CountColor($0, b.Expand(4, MainScreen.Bounds())) = 0; //Client doesn't always render everything when zoomed out
+    Result := CountColor($0, b.Expand(4, MainScreen.Bounds)) = 0; //Client doesn't always render everything when zoomed out
 end;
 
 
