@@ -434,16 +434,20 @@ function TRSMap.ScaledSearch(bitmap: TMufasaBitmap): TPointArray;
 var
   sample: TMufasaBitmap;
   matrix: TSingleMatrix;
-  n: Int32;
+  w, h, n, loops: Int32;
   p: TPoint;
 begin
   sample := Minimap.ScaleMinimap(bitmap, Self.Loader.Downscale, Self.Sample.Radius);
   matrix := MatchTemplateMask(Self.Cache, sample.ToMatrix(), TM_CCOEFF_NORMED);
 
+  w := sample.GetWidth() div 2;
+  h := sample.GetHeight() div 2;
+
   while Length(Result) < Self.Sample.Amount do
+  begin
     with matrix.ArgMax() do
     begin
-      p := Offset(sample.GetWidth() div 2, sample.GetHeight() div 2) * Self.Loader.Downscale;
+      p := Offset(w, h) * Self.Loader.Downscale;
 
       for n := 0 to High(Self.Filters) do
       begin
@@ -458,6 +462,14 @@ begin
 
       matrix.Fill([X - 5, Y - 5, X + 5, Y + 5], 0);
     end;
+
+    if Inc(loops) > 50 then
+    begin
+      WriteLn('ScaledSearch Got Stuck! ArgMax:', matrix.ArgMax(), ' ArgMin: ', matrix.ArgMin(), ' Max: ', matrix.Max(), ' Min: ', matrix.Min(), ' Mean:', matrix.Mean() );
+      bitmap.Debug();
+      Break;
+    end;
+  end;
 
   n := Self.Loader.Downscale div 2;
   Result := Result.Offset(n, n);

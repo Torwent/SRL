@@ -39,16 +39,16 @@ TRSMinimap type used to interact with the minimap
 (*
 ## Minimap.GetOrbLevel
 ```pascal
-function TRSMinimap.GetOrbLevel(Orb: TCircle): Int32;
+function TRSMinimap.GetLevel(Orb: TCircle): Int32;
 ```
 Returns the level of the specified orb.
 
 Example:
 ```pascal
-WriteLn Minimap.GetOrbLevel(Minimap.GetSpecAttackCircle());
+WriteLn Minimap.GetLevel(Minimap.GetSpecAttackCircle());
 ```
 *)
-function TRSMinimap.GetOrbLevel(orb: ERSMinimapOrb): Int32;
+function TRSMinimap.GetLevel(orb: ERSMinimapOrb): Int32;
 begin
   Result := OCR.RecognizeNumber([Self.Orbs[orb].X-35, Self.Orbs[orb].Y-1, Self.Orbs[orb].X-15, Self.Orbs[orb].Y+9], TOCRShadowFilter.Create(), RS_FONT_PLAIN_11);
 end;
@@ -67,7 +67,7 @@ WriteLn Minimap.GetRunEnergy();
 *)
 function TRSMinimap.GetRunEnergy(): Int32;
 begin
-  Result := Self.GetOrbLevel(ERSMinimapOrb.ENERGY);
+  Result := Self.GetLevel(ERSMinimapOrb.ENERGY);
 end;
 
 (*
@@ -84,7 +84,7 @@ WriteLn Minimap.GetHPLevel();
 *)
 function TRSMinimap.GetHPLevel(): Int32;
 begin
-  Result := Self.GetOrbLevel(ERSMinimapOrb.HITPOINTS);
+  Result := Self.GetLevel(ERSMinimapOrb.HITPOINTS);
 end;
 
 (*
@@ -126,7 +126,7 @@ WriteLn Minimap.GetPrayerLevel();
 *)
 function TRSMinimap.GetPrayerLevel(): Int32;
 begin
-  Result := Self.GetOrbLevel(ERSMinimapOrb.PRAYER);
+  Result := Self.GetLevel(ERSMinimapOrb.PRAYER);
 end;
 
 (*
@@ -168,7 +168,7 @@ WriteLn Minimap.GetSpecLevel();
 *)
 function TRSMinimap.GetSpecLevel(): Int32;
 begin
-  Result := Self.GetOrbLevel(ERSMinimapOrb.SPECIAL_ATTACK);
+  Result := Self.GetLevel(ERSMinimapOrb.SPECIAL_ATTACK);
 end;
 
 
@@ -205,7 +205,7 @@ begin
       if (g[0].Mean().DistanceTo(g[1].Mean()) > 25) then Swap(g[0], g[2]);
       if (g[0].Mean().DistanceTo(g[2].Mean()) > 25) then Swap(g[0], g[1]);
 
-      if Abs(srl.DeltaAngle(ArcTan2(g[1][0].Y - Y, g[1][0].X - X)+PI/2, ArcTan2(g[0][0].Y - Y, g[0][0].X - X), 2*PI)) > PI/2 then
+      if Abs(srl.DeltaAngle(ArcTan2(g[1,0].Y - Y, g[1,0].X - X)+PI/2, ArcTan2(g[0,0].Y - Y, g[0,0].X - X), 2*PI)) > PI/2 then
         Swap(g[1], g[2]);
 
       Result := FixRad(ArcTan2(g[1].MeanEx().Y - g[2].MeanEx().Y, g[1].MeanEx().X - g[2].MeanEx().X));
@@ -705,10 +705,10 @@ function TRSMinimap.EnableSpec(minSpec: Int32): Boolean;
 var
   T: UInt64;
 begin
-  if not Self.IsSpecWeapon or (Self.GetSpecLevel < MinSpec) then
+  if not Self.IsSpecWeapon() or (Self.GetLevel(ERSMinimapOrb.SPECIAL_ATTACK) < MinSpec) then
     Exit(False);
 
-  Result := Self.IsSpecEnabled;
+  Result := Self.IsSpecEnabled();
   if not Result then
   begin
     Mouse.Click(Self.Orbs[ERSMinimapOrb.SPECIAL_ATTACK], MOUSE_LEFT);
