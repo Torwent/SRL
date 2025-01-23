@@ -10,56 +10,27 @@ Methods to interact with the grand exchange.
 {$SCOPEDENUMS ON}
 
 type
-  ERSGEOverviewButton = (
-    CHANGE_TAB,
-    COLLECT
-  );
+  ERSGEOverviewButton = (CHANGE_TAB, COLLECT);
 
   ERSGESetupOfferButton = (
-    HISTORY,
-    ITEM,
-    QUANTITY,
-    PRICE,
-    QUANTITY_1,
-    QUANTITY_10,
-    QUANTITY_100,
-    QUANTITY_ALL,
-    QUANTITY_ENTER,
-    PRICE_DECREASE_PERC_ENTER,
-    PRICE_DECREASE,
-    PRICE_GUIDE,
-    PRICE_ENTER,
-    PRICE_INCREASE,
-    PRICE_INCREASE_PERC_ENTER,
-    TOTAL,
-    CONFIRM
+    HISTORY, ITEM, QUANTITY, PRICE,
+    QUANTITY_1, QUANTITY_10, QUANTITY_100, QUANTITY_ALL, QUANTITY_ENTER,
+    PRICE_DECREASE_PERC_ENTER, PRICE_DECREASE,
+    PRICE_GUIDE, PRICE_ENTER, PRICE_INCREASE, PRICE_INCREASE_PERC_ENTER,
+    TOTAL, CONFIRM
   );
 
-  ERSGEOfferStatusButton = (
-    HISTORY,
-    ITEM,
-    QUANTITY,
-    PRICE,
-    TOTAL,
-    PROGRESS
-  );
+  ERSGEOfferStatusButton = (HISTORY, ITEM, QUANTITY, PRICE, TOTAL, PROGRESS);
 
-  ERSGEInterface = (
-    UNKNOWN,
-    OVERVIEW,
-    HISTORY,
-    OFFER_STATUS,
-    OFFER_SETUP
-  );
+  ERSGEInterface = (UNKNOWN, OVERVIEW, HISTORY, OFFER_STATUS, OFFER_SETUP);
 
-  ERSGEOfferCreateButton = (
-    BUY,
-    SELL
-  );
+  ERSGEOfferCreateButton = (BUY, SELL);
 
   TRSGrandExchange = record(TRSTitledInterface)
     FINDER_BANKER: TRSObjectFinder;
     FINDER_CLERK: TRSObjectFinder;
+
+    ItemNameBox: TBox;
   end;
 
   ERSGEOfferStatus = (ACTIVE, COMPLETE, ABORTED, EMPTY, UNKNOWN);
@@ -229,7 +200,7 @@ function TRSGrandExchange.GetTitleText() : String;
 var
   titleBox : tBox;
 begin
-  titleBox := [Self.X1, Self.Y1, Self.X2, Self.Y1+30];
+  titleBox := [Self.Bounds.X1, Self.Bounds.Y1, Self.Bounds.X2, Self.Bounds.Y1 + 30];
   result := OCR.Recognize(titleBox, TOCRColorFilter.Create([2070783]), RS_FONT_BOLD_12);
 end;
 
@@ -322,18 +293,11 @@ begin
   Mouse.Move(Self.Bounds.Expand(5).NearestEdge(Mouse.Position()));
 end;
 
-function TRSGrandExchange.GetItemName: String;
-var
-  B: TBox;
+function TRSGrandExchange.GetItemName(): String;
 begin
-  B.X1 := Self.X1 + 159;
-  B.Y1 := Self.Y1 + 41;
-  B.X2 := Self.X2 - 9;
-  B.Y2 := Self.Y1 + 64;
-
   case Self.GetCurrentInterface() of
-    ERSGEInterface.OFFER_SETUP:  Result := OCR.Recognize(B, TOCRColorFilter.Create([2070783]), RS_FONT_BOLD_12);
-    ERSGEInterface.OFFER_STATUS: Result := OCR.Recognize(B, TOCRColorFilter.Create([2070783]), RS_FONT_BOLD_12);
+    ERSGEInterface.OFFER_SETUP:  Result := OCR.Recognize(Self.ItemNameBox, TOCRColorFilter.Create([2070783]), RS_FONT_BOLD_12);
+    ERSGEInterface.OFFER_STATUS: Result := OCR.Recognize(Self.ItemNameBox, TOCRColorFilter.Create([2070783]), RS_FONT_BOLD_12);
   end;
 end;
 
@@ -421,7 +385,7 @@ var
   B : tBox;
 begin
   // Offset from chat to find the result box
-  B := [chat.x1 + 254, chat.y1 + 28, chat.x2 - 138, chat.y2 - 80];
+  B := [chat.Bounds.x1 + 254, chat.Bounds.y1 + 28, chat.Bounds.x2 - 138, chat.Bounds.y2 - 80];
   result := OCR.RecognizeLines(B, TOCRColorFilter.Create([$000000]), RS_FONT_PLAIN_12).Merge(' ');
 end;
 
@@ -458,7 +422,7 @@ function TRSGrandExchange.FindSearch(Item: String; out B: TBox): Boolean;
   end;
 
 var
-  searchGrid : tBoxArray := grid(3,3, 161, 32, point(0,0), point(Chat.X1 + 11, Chat.Y1 + 29));
+  searchGrid : TBoxArray := Grid(3,3, 161, 32, point(0,0), point(Chat.Bounds.X1 + 11, Chat.Bounds.Y1 + 29));
 begin
   if (Item <> '') then
     Item[1] := UpCase(Item[1]);
@@ -491,7 +455,7 @@ begin
   begin
     if self.GetPreviousSearch = Item then
     begin
-      B := [chat.x1 + 124, chat.y1 + 28, chat.x2 - 138, chat.y2 - 80];
+      B := [chat.Bounds.x1 + 124, chat.Bounds.y1 + 28, chat.Bounds.x2 - 138, chat.Bounds.y2 - 80];
 
       result := True;
     end else
@@ -595,7 +559,7 @@ end;
 
 function TRSGrandExchange.GetOfferSlots: TBoxArray;
 begin
-  Result := Grid(4, 2, 114, 109, [3, 11], [Self.X1 + 9, Self.Y1 + 64]);
+  Result := Grid(4, 2, 114, 109, [3, 11], [Self.Bounds.X1 + 9, Self.Bounds.Y1 + 64]);
 end;
 
 function TRSGrandExchange.GetProgress(B: TBox; BarSize: Int32): Int32;
@@ -977,7 +941,7 @@ end;
 
 function TRSGrandExchange.GetCollectionBoxes() : tBoxArray;
 begin
-  result := grid(2, 1, 36, 33, point(15,0), point(self.X2 - 105, self.Y2 - 52));
+  result := grid(2, 1, 36, 33, point(15,0), point(self.Bounds.X2 - 105, self.Bounds.Y2 - 52));
 end;
 
 function TRSGrandExchange.CountCollectionSlots() : Int32;
@@ -1371,20 +1335,25 @@ procedure TRSGrandExchange.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
 begin
-  alignment.Left := InterfaceArea.X1;
-  alignment.Right := InterfaceArea.X2;
-  alignment.Bottom := InterfaceArea.Y2;
+  alignment.Left := InterfaceArea.Bounds.X1;
+  alignment.Right := InterfaceArea.Bounds.X2;
+  alignment.Bottom := InterfaceArea.Bounds.Y2;
   alignment.MaxWidth := 484;
   alignment.MaxHeight := 304;
 
   case RSClient.Mode of
     ERSClientMode.FIXED:
-      alignment.Top := InterfaceArea.Y1;
+      alignment.Top := InterfaceArea.Bounds.Y1;
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
-      alignment.Top := InterfaceArea.Y1 - 1;
+      alignment.Top := InterfaceArea.Bounds.Y1 - 1;
   end;
 
   Self.SetupAlignment(alignment);
+
+  Self.ItemNameBox.X1 := Self.Bounds.X1 + 159;
+  Self.ItemNameBox.Y1 := Self.Bounds.Y1 + 41;
+  Self.ItemNameBox.X2 := Self.Bounds.X2 - 9;
+  Self.ItemNameBox.Y2 := Self.Bounds.Y1 + 64;
 end;
 
 var

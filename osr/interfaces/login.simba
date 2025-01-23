@@ -918,10 +918,10 @@ procedure TRSLogin.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
 begin
-  alignment.Left   := RootInterface.X1;
-  alignment.Right  := RootInterface.X2;
-  alignment.Top    := RootInterface.Y1;
-  alignment.Bottom := RootInterface.Y1 + 502;
+  alignment.Left   := RootInterface.Bounds.X1;
+  alignment.Right  := RootInterface.Bounds.X2;
+  alignment.Top    := RootInterface.Bounds.Y1;
+  alignment.Bottom := RootInterface.Bounds.Y1 + 502;
   alignment.MaxWidth := 764;
   alignment.MaxHeight := 0;
 

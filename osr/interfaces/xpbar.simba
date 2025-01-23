@@ -45,30 +45,30 @@ procedure TRSXPBar.SetupAlignment(); overload;
 begin
   with Self.Alignments[0] do
   begin
-    Left := InterfaceArea.X1 + 2;
-    Right := InterfaceArea.X1 + 141;
-    Top := InterfaceArea.Y1 + 23;
-    Bottom := InterfaceArea.Y1 + 51;
+    Left := InterfaceArea.Bounds.X1 + 2;
+    Right := InterfaceArea.Bounds.X1 + 141;
+    Top := InterfaceArea.Bounds.Y1 + 23;
+    Bottom := InterfaceArea.Bounds.Y1 + 51;
     MaxWidth := 0;
     MaxHeight := 0;
   end;
 
   with Self.Alignments[1] do
   begin
-    Left   := InterfaceArea.X1;
-    Right  := InterfaceArea.X2;
-    Top    := InterfaceArea.Y1 + 23;
-    Bottom := InterfaceArea.Y1 + 51;
+    Left   := InterfaceArea.Bounds.X1;
+    Right  := InterfaceArea.Bounds.X2;
+    Top    := InterfaceArea.Bounds.Y1 + 23;
+    Bottom := InterfaceArea.Bounds.Y1 + 51;
     MaxWidth := 140;
     MaxHeight := 0;
   end;
 
   with Self.Alignments[2] do
   begin
-    Left := InterfaceArea.X2 - 141;
-    Right := InterfaceArea.X2 - 2;
-    Top := InterfaceArea.Y1;
-    Bottom := InterfaceArea.Y1 + 28;
+    Left := InterfaceArea.Bounds.X2 - 141;
+    Right := InterfaceArea.Bounds.X2 - 2;
+    Top := InterfaceArea.Bounds.Y1;
+    Bottom := InterfaceArea.Bounds.Y1 + 28;
     MaxWidth := 0;
     MaxHeight := 0;
   end;

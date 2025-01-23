@@ -29,25 +29,25 @@ var
   boxes: TBoxArray;
   i: Int32;
 begin
-  alignment.Left := GameTab.X1;
-  alignment.Right := GameTab.X2;
-  alignment.Top := GameTab.Y1;
-  alignment.Bottom := GameTab.Y2;
+  alignment.Left := GameTab.Bounds.X1;
+  alignment.Right := GameTab.Bounds.X2;
+  alignment.Top := GameTab.Bounds.Y1;
+  alignment.Bottom := GameTab.Bounds.Y2;
 
   Self.SetupAlignment(alignment);
 
-  boxes := Grid(3, 1, 55, 24, [9], [Self.X1, Self.Y1 + 5]);
+  boxes := Grid(3, 1, 55, 24, [9], [Self.Bounds.X1, Self.Bounds.Y1 + 5]);
 
   for i := 0 to High(boxes) do
     Self.Tabs[ERSOptionsTab(i)] := boxes[i];
 
-  Self.Sliders[ERSOptionsSlider.BRIGHTNESS].X1 := Self.X1 + 57;
-  Self.Sliders[ERSOptionsSlider.BRIGHTNESS].Y1 := Self.Y1 + 72;
+  Self.Sliders[ERSOptionsSlider.BRIGHTNESS].X1 := Self.Bounds.X1 + 57;
+  Self.Sliders[ERSOptionsSlider.BRIGHTNESS].Y1 := Self.Bounds.Y1 + 72;
   Self.Sliders[ERSOptionsSlider.BRIGHTNESS].X2 := Self.Sliders[ERSOptionsSlider.BRIGHTNESS].X1 + 96;
   Self.Sliders[ERSOptionsSlider.BRIGHTNESS].Y2 := Self.Sliders[ERSOptionsSlider.BRIGHTNESS].Y1 + 9;
 
-  Self.Sliders[ERSOptionsSlider.ZOOM].X1 := Self.X1 + 57;
-  Self.Sliders[ERSOptionsSlider.ZOOM].Y1 := Self.Y1 + 109;
+  Self.Sliders[ERSOptionsSlider.ZOOM].X1 := Self.Bounds.X1 + 57;
+  Self.Sliders[ERSOptionsSlider.ZOOM].Y1 := Self.Bounds.Y1 + 109;
   Self.Sliders[ERSOptionsSlider.ZOOM].X2 := Self.Sliders[ERSOptionsSlider.ZOOM].X1 + 96;
   Self.Sliders[ERSOptionsSlider.ZOOM].Y2 := Self.Sliders[ERSOptionsSlider.ZOOM].Y1 + 9;
 end;

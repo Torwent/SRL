@@ -111,26 +111,26 @@ procedure TRSInterfaceArea.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
 begin
-  alignment.Top := MainScreen.Y1;
-  alignment.Left := MainScreen.X1;
+  alignment.Top := MainScreen.Bounds.Y1;
+  alignment.Left := MainScreen.Bounds.X1;
 
   case RSclient.Mode of
     ERSClientMode.FIXED:
     begin
-      alignment.Right := MainScreen.X2;
-      alignment.Bottom := MainScreen.Y2;
+      alignment.Right := MainScreen.Bounds.X2;
+      alignment.Bottom := MainScreen.Bounds.Y2;
     end;
 
     ERSClientMode.RESIZABLE_CLASSIC:
     begin
-      alignment.Right := GameTabs.X1 - 10;
-      alignment.Bottom := Chat.Y1;
+      alignment.Right := GameTabs.Bounds.X1 - 10;
+      alignment.Bottom := Chat.Bounds.Y1;
     end;
 
     ERSClientMode.RESIZABLE_MODERN:
     begin
-      alignment.Right := GameTabs.X1 + 15;
-      alignment.Bottom := Chat.Y1;
+      alignment.Right := GameTabs.Bounds.X1 + 15;
+      alignment.Bottom := Chat.Bounds.Y1;
     end;
   end;
 

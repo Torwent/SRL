@@ -80,6 +80,7 @@ type
 type
   TRSStats = record(TRSInterface)
     Levels: array [ERSSkill] of Int32;
+    SkillBoxes: array [ERSSkill] of TBox;
   end;
 
 (*
@@ -106,46 +107,18 @@ Internal method automatically called by RSClient.ClientModeChanged()
 procedure TRSStats.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
+  boxes: TBoxArray;
+  i: Int32;
 begin
-  alignment.Left := GameTab.X1;
-  alignment.Right := GameTab.X2;
-  alignment.Top := GameTab.Y1;
-  alignment.Bottom := GameTab.Y2;
-  Self.SetupAlignment(alignment);;
-end;
+  alignment.Left := GameTab.Bounds.X1;
+  alignment.Right := GameTab.Bounds.X2;
+  alignment.Top := GameTab.Bounds.Y1;
+  alignment.Bottom := GameTab.Bounds.Y2;
+  Self.SetupAlignment(alignment);
 
-(*
-## Stats.GetSkillBoxes
-```pascal
-function TRSStats.GetSkillBoxes(): TBoxArray;
-```
-Internal method used to retrieve the skill boxes.
-
-Example:
-```pascal
-Debug(Stats.GetSkillBoxes());
-```
-*)
-function TRSStats.GetSkillBoxes(): TBoxArray;
-begin
-  Result := Grid(3, 8, 53, 23, [10, 9], [Self.X1 + 2, Self.Y1 + 6]);
-end;
-
-(*
-## Stats.GetSkillBox
-```pascal
-function TRSStats.GetSkillBox(skill: ERSSkill): TBox;
-```
-Method used to retrieve a skill box.
-
-Example:
-```pascal
-Debug(Stats.GetSkillBox(ERSSkill.AGILITY));
-```
-*)
-function TRSStats.GetSkillBox(skill: ERSSkill): TBox;
-begin
-  Result := Self.GetSkillBoxes()[Ord(skill)];
+  boxes := Grid(3, 8, 53, 23, [10, 9], [Self.Bounds.X1 + 2, Self.Bounds.Y1 + 6]);
+  for i := 0 to Ord(High(ERSSkill)) do
+    Self.SkillBoxes[ERSSkill(i)] := boxes[i];
 end;
 
 (*
@@ -198,7 +171,7 @@ function TRSStats.MouseOver(skill: ERSSkill): Boolean;
 begin
   Result := Self.Open();
   if Result then
-    Mouse.Move(Self.GetSkillBox(skill));
+    Mouse.Move(Self.SkillBoxes[skill]);
 end;
 
 (*
@@ -283,7 +256,7 @@ begin
   if not Self.Open() then
     Exit(-1);
 
-  b := Self.GetSkillBox(skill);
+  b := Self.SkillBoxes[skill];
   b.Y1 := b.Y2 - (b.Height() div 2);
 
   text := OCR.Recognize(b, TOCRColorFilter.Create([65535]), RS_FONT_PLAIN_11);
@@ -329,14 +302,14 @@ begin
 end;
 
 
-procedure TRSStats.Draw(Bitmap: TMufasaBitmap); override;
+procedure TRSStats.Draw(bitmap: TMufasaBitmap); override;
 begin
   if not Self.IsOpen() then
     Exit;
 
   inherited();
 
-  Bitmap.DrawBoxes(Self.GetSkillBoxes(), $00FFFF);
+  bitmap.DrawBoxes(Self.SkillBoxes, $00FFFF);
 end;
 
 var

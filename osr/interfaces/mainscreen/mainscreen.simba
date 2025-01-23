@@ -178,20 +178,20 @@ begin
   case RSClient.Mode of
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
     begin
-      alignment.Left := RootInterface.X1;
-      alignment.Right := RootInterface.X2;
-      alignment.Top := RootInterface.Y1;
-      alignment.Bottom := RootInterface.Y2;
+      alignment.Left := RootInterface.Bounds.X1;
+      alignment.Right := RootInterface.Bounds.X2;
+      alignment.Top := RootInterface.Bounds.Y1;
+      alignment.Bottom := RootInterface.Bounds.Y2;
 
       Self.UpTextArea := [3, 3, 500, 21];
     end;
 
     ERSClientMode.FIXED:
     begin
-      alignment.Left := RootInterface.X1 + 4;
-      alignment.Right := RootInterface.X1 + 515;
-      alignment.Top := RootInterface.Y1 + 4;
-      alignment.Bottom := RootInterface.Y1 + 337;
+      alignment.Left := RootInterface.Bounds.X1 + 4;
+      alignment.Right := RootInterface.Bounds.X1 + 515;
+      alignment.Top := RootInterface.Bounds.Y1 + 4;
+      alignment.Bottom := RootInterface.Bounds.Y1 + 337;
 
       Self.UpTextArea := [7, 7, 500, 25];
     end;
@@ -1067,7 +1067,7 @@ end;
 
 
 
-function TRSItemInterfaceHandler.InteractSlot(slot: Int32; option: String = ''): Boolean; override;
+function TRSItemInterface.InteractSlot(slot: Int32; option: String = ''): Boolean; override;
 begin
   if not Self.MouseSlot(slot) then Exit;
 
@@ -1080,7 +1080,7 @@ begin
   Result := ChooseOption.Select(option);
 end;
 
-function TRSItemInterfaceHandler.InteractItem(item: TRSItem; option: String = ''): Boolean; override;
+function TRSItemInterface.InteractItem(item: TRSItem; option: String = ''): Boolean; override;
 begin
   if not Self.MouseItem(item) then Exit;
 

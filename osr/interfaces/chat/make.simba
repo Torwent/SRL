@@ -49,10 +49,10 @@ procedure TRSMake.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
 begin
-  alignment.Left   := Chat.X1;
-  alignment.Right  := Chat.X2;
-  alignment.Top    := Chat.Y1;
-  alignment.Bottom := Chat.Y2;
+  alignment.Left   := Chat.Bounds.X1;
+  alignment.Right  := Chat.Bounds.X2;
+  alignment.Top    := Chat.Bounds.Y1;
+  alignment.Bottom := Chat.Bounds.Y2;
   Self.SetupAlignment(alignment);
 end;
 

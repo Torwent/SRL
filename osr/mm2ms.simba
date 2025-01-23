@@ -494,10 +494,10 @@ begin
     Exit(MM2MS.ZoomRectangles[MM2MS.ZoomLevel]);
 
   Result := [
-    MainScreen.PointToMM([MainScreen.X1, MainScreen.Y1]).ToPoint(),
-    MainScreen.PointToMM([MainScreen.X2, MainScreen.Y1]).ToPoint(),
-    MainScreen.PointToMM([MainScreen.X2, MainScreen.Y2]).ToPoint(),
-    MainScreen.PointToMM([MainScreen.X1, MainScreen.Y2]).ToPoint()
+    MainScreen.PointToMM([MainScreen.Bounds.X1, MainScreen.Bounds.Y1]).ToPoint(),
+    MainScreen.PointToMM([MainScreen.Bounds.X2, MainScreen.Bounds.Y1]).ToPoint(),
+    MainScreen.PointToMM([MainScreen.Bounds.X2, MainScreen.Bounds.Y2]).ToPoint(),
+    MainScreen.PointToMM([MainScreen.Bounds.X1, MainScreen.Bounds.Y2]).ToPoint()
   ];
   MM2MS.ZoomRectangles[MM2MS.ZoomLevel] := Result;
 end;

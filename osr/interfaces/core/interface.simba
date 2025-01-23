@@ -12,7 +12,6 @@ type
     ButtonColors: array of TCTS1Color;
     ButtonEnabledColors: array of TCTS1Color;
 
-    X1, Y1, X2, Y2: Int32;
     Width, Height: Int32;
     Center: TPoint;
     Bounds: TBox;
@@ -43,13 +42,13 @@ begin
     center := alignment.Left + half;
     halfMax := (alignment.MaxWidth - 1) / 2;
 
-    Self.X1 := Max(Floor(center - half), Floor(center - halfMax));
-    Self.X2 := Min(Floor(center + half), Floor(center + halfMax));
+    Self.Bounds.X1 := Max(Floor(center - half), Floor(center - halfMax));
+    Self.Bounds.X2 := Min(Floor(center + half), Floor(center + halfMax));
   end
   else
   begin
-    Self.X1 := alignment.Left;
-    Self.X2 := alignment.Right;
+    Self.Bounds.X1 := alignment.Left;
+    Self.Bounds.X2 := alignment.Right;
   end;
 
   if alignment.MaxHeight > 0 then
@@ -59,16 +58,15 @@ begin
     center := alignment.Top + half;
     halfMax := (alignment.MaxHeight - 1) / 2;
 
-    Self.Y1 := Max(Floor(center - half), Floor(center - halfMax));
-    Self.Y2 := Min(Floor(center + half), Floor(center + halfMax));
+    Self.Bounds.Y1 := Max(Floor(center - half), Floor(center - halfMax));
+    Self.Bounds.Y2 := Min(Floor(center + half), Floor(center + halfMax));
   end
   else
   begin
-    Self.Y1 := alignment.Top;
-    Self.Y2 := alignment.Bottom;
+    Self.Bounds.Y1 := alignment.Top;
+    Self.Bounds.Y2 := alignment.Bottom;
   end;
 
-  Self.Bounds := Box(Self.X1, Self.Y1, Self.X2, Self.Y2);
   Self.Rectangle := Self.Bounds.ToRectangle();
   Self.Center := Self.Bounds.Middle();
   Self.Width := Self.Bounds.Width();
@@ -442,7 +440,9 @@ begin
 end;
 
 type
-  TRSTitledInterface = type TRSInterface;
+  TRSTitledInterface = record(TRSInterface)
+    CloseButtonBounds: TBox;
+  end;
 
 function TRSTitledInterface.GetTitle(): String;
 var
@@ -459,20 +459,15 @@ begin
 end;
 
 function TRSTitledInterface.ClickCloseButton(PressEscape: Boolean = False): Boolean;
-var
-  B: TBox;
 begin
-  B.X1 := Self.X2-28;
-  B.X2 := Self.X2-6;
-  B.Y1 := Self.Y1+6;
-  B.Y2 := Self.Y1+28;
 
-  Result := SRL.CountColor(65536, B) > 80;
+
+  Result := SRL.CountColor(65536, Self.CloseButtonBounds) > 80;
 
   if Result then
   begin
     case PressEscape of
-      False: Mouse.Click(B, MOUSE_LEFT);
+      False: Mouse.Click(Self.CloseButtonBounds, MOUSE_LEFT);
       True:  Keyboard.PressKey(VK_ESCAPE);
     end;
   end;
@@ -488,14 +483,17 @@ begin
   Result := WaitUntil(Self.IsTitle(Text), 100, WaitTime);
 end;
 
+procedure TRSTitledInterface.SetupAlignment(alignment: TRSInterfaceAlignment); override;
+begin
+  inherited;
+
+  Self.CloseButtonBounds.X1 := Self.Bounds.X2-28;
+  Self.CloseButtonBounds.X2 := Self.Bounds.X2-6;
+  Self.CloseButtonBounds.Y1 := Self.Bounds.Y1+6;
+  Self.CloseButtonBounds.Y2 := Self.Bounds.Y1+28;
+end;
+
 type
-  TRSItemInterface = record(TRSInterface)
-    Items: TRSItemInterfaceHandler;
-    SlotBoxes: TBoxArray;
-  end;
-
-  PRSItemInterface = ^TRSItemInterface;
-
   TRSRootInterface = type TRSInterface;
 
 var

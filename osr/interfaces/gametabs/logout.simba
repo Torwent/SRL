@@ -23,10 +23,10 @@ procedure TRSLogout.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
 begin 
-  alignment.Left := GameTab.X1 - 3;
-  alignment.Right := GameTab.X2 + 3;
-  alignment.Top := GameTab.Y1;
-  alignment.Bottom := GameTab.Y2;
+  alignment.Left := GameTab.Bounds.X1 - 3;
+  alignment.Right := GameTab.Bounds.X2 + 3;
+  alignment.Top := GameTab.Bounds.Y1;
+  alignment.Bottom := GameTab.Bounds.Y2;
   Self.SetupAlignment(alignment);
 end;
 

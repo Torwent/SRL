@@ -16,7 +16,7 @@ type
   );
 
   TRSDepositBox = record(TRSTitledInterface)
-    Items: TRSItemInterfaceHandler;
+    Items: TRSItemInterface;
     InventorySlotBoxes, EquipmentSlotBoxes : TBoxArray;
     Buttons: TRSButtonArray;
   end;
@@ -40,22 +40,22 @@ var
 const
   BUTTON_ENABLED_COLORS : array of TCTS1Color = [[2369440, 5], [2700350, 5]];
 begin
-  alignment.Right := InterfaceArea.X2;
-  alignment.Bottom := InterfaceArea.Y2;
+  alignment.Right := InterfaceArea.Bounds.X2;
+  alignment.Bottom := InterfaceArea.Bounds.Y2;
   alignment.MaxWidth := 425;
   alignment.MaxHeight := 313;
 
   case RSClient.Mode of
     ERSClientMode.FIXED:
     begin
-      alignment.Left := InterfaceArea.X1;
-      alignment.Top := InterfaceArea.Y1;
+      alignment.Left := InterfaceArea.Bounds.X1;
+      alignment.Top := InterfaceArea.Bounds.Y1;
     end;
 
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
     begin
-      alignment.Left := InterfaceArea.X1 - 1;
-      alignment.Top := InterfaceArea.Y1 - 1;
+      alignment.Left := InterfaceArea.Bounds.X1 - 1;
+      alignment.Top := InterfaceArea.Bounds.Y1 - 1;
     end;
   end;
 
@@ -69,20 +69,20 @@ begin
     Box(21,213,54,246), Box(77,213,110,246), // Hands, Feet
     Box(133,213,166,246)  // Ring
   ];
-  Self.EquipmentSlotBoxes := Self.EquipmentSlotBoxes.Offset(Point(Self.X1, Self.Y1));
+  Self.EquipmentSlotBoxes := Self.EquipmentSlotBoxes.Offset(Point(Self.Bounds.X1, Self.Bounds.Y1));
 
-  Self.InventorySlotBoxes := Grid(4, 7, 33, 33, [9, 3], [Self.X1 + 195, Self.Y1 + 48]);
+  Self.InventorySlotBoxes := Grid(4, 7, 33, 33, [9, 3], [Self.Bounds.X1 + 195, Self.Bounds.Y1 + 48]);
 
   Self.Buttons := [
-    [BUTTON_ENABLED_COLORS, 0, Box(379,42,412,69).Offset([Self.X1, Self.Y1]), Point(395,55).Offset(Self.X1, Self.Y1)],
-    [BUTTON_ENABLED_COLORS, 1, Box(379,95,412,128).Offset([Self.X1, Self.Y1]), Point(395,111).Offset(Self.X1, Self.Y1)],
-    [BUTTON_ENABLED_COLORS, 2, Box(379,138,412,171).Offset([Self.X1, Self.Y1]), Point(395,154).Offset(Self.X1, Self.Y1)],
-    [BUTTON_ENABLED_COLORS, 3, Box(379,181,412,214).Offset([Self.X1, Self.Y1]), Point(395,197).Offset(Self.X1, Self.Y1)],
-    [BUTTON_ENABLED_COLORS, 4, Box(379,224,412,257).Offset([Self.X1, Self.Y1]), Point(395,240).Offset(Self.X1, Self.Y1)],
-    [BUTTON_ENABLED_COLORS, 5, Box(379,267,412,300).Offset([Self.X1, Self.Y1]), Point(395,283).Offset(Self.X1, Self.Y1)],
-    [BUTTON_ENABLED_COLORS, 6, Box(21,267,58,300).Offset([Self.X1, Self.Y1]), Point(39,283).Offset(Self.X1, Self.Y1)],
-    [BUTTON_ENABLED_COLORS, 7, Box(75,267,112,300).Offset([Self.X1, Self.Y1]), Point(93,283).Offset(Self.X1, Self.Y1)],
-    [BUTTON_ENABLED_COLORS, 8, Box(129,267,166,300).Offset([Self.X1, Self.Y1]), Point(147,283).Offset(Self.X1, Self.Y1)]
+    [BUTTON_ENABLED_COLORS, 0, Box(379,42,412,69).Offset([Self.Bounds.X1, Self.Bounds.Y1]), Point(395,55).Offset(Self.Bounds.X1, Self.Bounds.Y1)],
+    [BUTTON_ENABLED_COLORS, 1, Box(379,95,412,128).Offset([Self.Bounds.X1, Self.Bounds.Y1]), Point(395,111).Offset(Self.Bounds.X1, Self.Bounds.Y1)],
+    [BUTTON_ENABLED_COLORS, 2, Box(379,138,412,171).Offset([Self.Bounds.X1, Self.Bounds.Y1]), Point(395,154).Offset(Self.Bounds.X1, Self.Bounds.Y1)],
+    [BUTTON_ENABLED_COLORS, 3, Box(379,181,412,214).Offset([Self.Bounds.X1, Self.Bounds.Y1]), Point(395,197).Offset(Self.Bounds.X1, Self.Bounds.Y1)],
+    [BUTTON_ENABLED_COLORS, 4, Box(379,224,412,257).Offset([Self.Bounds.X1, Self.Bounds.Y1]), Point(395,240).Offset(Self.Bounds.X1, Self.Bounds.Y1)],
+    [BUTTON_ENABLED_COLORS, 5, Box(379,267,412,300).Offset([Self.Bounds.X1, Self.Bounds.Y1]), Point(395,283).Offset(Self.Bounds.X1, Self.Bounds.Y1)],
+    [BUTTON_ENABLED_COLORS, 6, Box(21,267,58,300).Offset([Self.Bounds.X1, Self.Bounds.Y1]), Point(39,283).Offset(Self.Bounds.X1, Self.Bounds.Y1)],
+    [BUTTON_ENABLED_COLORS, 7, Box(75,267,112,300).Offset([Self.Bounds.X1, Self.Bounds.Y1]), Point(93,283).Offset(Self.Bounds.X1, Self.Bounds.Y1)],
+    [BUTTON_ENABLED_COLORS, 8, Box(129,267,166,300).Offset([Self.Bounds.X1, Self.Bounds.Y1]), Point(147,283).Offset(Self.Bounds.X1, Self.Bounds.Y1)]
   ];
 end;
 

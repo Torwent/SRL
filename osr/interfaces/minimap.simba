@@ -11,6 +11,7 @@ Methods to interact with the minimap.
 type
   ERSMinimapDot = (PLAYER, NPC, ITEM);
   ERSMinimapDots = set of ERSMinimapDot;
+  ERSMinimapCircle = (COMPASS, XP, HP, PRAYER, RUN, SPECIAL_ATTACK);
 
 (*
 (TRSMinimap)=
@@ -30,6 +31,7 @@ end;
 TRSMinimap type used to interact with the minimap
 *)
   TRSMinimap = record(TRSInterface)
+    Circles: array [ERSMinimapCircle] of TCircle;
     CompassCircleOffset: TPoint;
     XPCircleOffset: TPoint;
     HitpointsCircleOffset: TPoint;
@@ -55,7 +57,7 @@ Debug(circle.ToTPA());
 *)
 function TRSMinimap.GetCompassCircle(): TCircle;
 begin
-  Result := [Self.X1 + Self.CompassCircleOffset.X, Self.Y1 + Self.CompassCircleOffset.Y, 17];
+  Result := [Self.Bounds.X1 + Self.CompassCircleOffset.X, Self.Bounds.Y1 + Self.CompassCircleOffset.Y, 17];
 end;
 
 (*
@@ -73,7 +75,7 @@ Debug(circle.ToTPA());
 *)
 function TRSMinimap.GetXPCircle(): TCircle;
 begin
-  Result := [Self.X1 + Self.XPCircleOffset.X + 10, Self.Y1 + Self.XPCircleOffset.Y, 11];
+  Result := [Self.Bounds.X1 + Self.XPCircleOffset.X + 10, Self.Bounds.Y1 + Self.XPCircleOffset.Y, 11];
 end;
 
 (*
@@ -91,7 +93,7 @@ Debug(circle.ToTPA());
 *)
 function TRSMinimap.GetHPCircle(): TCircle;
 begin
-  Result := [Self.X1 + Self.HitpointsCircleOffset.X, Self.Y1 + Self.HitpointsCircleOffset.Y, 12];
+  Result := [Self.Bounds.X1 + Self.HitpointsCircleOffset.X, Self.Bounds.Y1 + Self.HitpointsCircleOffset.Y, 12];
 end;
 
 (*
@@ -109,7 +111,7 @@ Debug(circle.ToTPA());
 *)
 function TRSMinimap.GetPrayerCircle(): TCircle;
 begin
-  Result := [Self.X1 + Self.PrayerCircleOffset.X, Self.Y1 + Self.PrayerCircleOffset.Y, 12];
+  Result := [Self.Bounds.X1 + Self.PrayerCircleOffset.X, Self.Bounds.Y1 + Self.PrayerCircleOffset.Y, 12];
 end;
 
 (*
@@ -127,7 +129,7 @@ Debug(circle.ToTPA());
 *)
 function TRSMinimap.GetRunCircle(): TCircle;
 begin
-  Result := [Self.X1 + Self.RunCircleOffset.X, Self.Y1 + Self.RunCircleOffset.Y, 12];
+  Result := [Self.Bounds.X1 + Self.RunCircleOffset.X, Self.Bounds.Y1 + Self.RunCircleOffset.Y, 12];
 end;
 
 (*
@@ -145,7 +147,7 @@ Debug(circle.ToTPA());
 *)
 function TRSMinimap.GetSpecAttackCircle(): TCircle;
 begin
-  Result := [Self.X1 + Self.SpecAttackCircleOffset.X, Self.Y1 + Self.SpecAttackCircleOffset.Y, 12];
+  Result := [Self.Bounds.X1 + Self.SpecAttackCircleOffset.X, Self.Bounds.Y1 + Self.SpecAttackCircleOffset.Y, 12];
 end;
 
 (*
@@ -499,10 +501,10 @@ begin
   case RSClient.Mode of
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
       begin
-        alignment.Left := RootInterface.X2 - 157;
-        alignment.Right := RootInterface.X2 - 6;
-        alignment.Top := RootInterface.Y1 + 8;
-        alignment.Bottom := RootInterface.Y1 + 159;
+        alignment.Left := RootInterface.Bounds.X2 - 157;
+        alignment.Right := RootInterface.Bounds.X2 - 6;
+        alignment.Top := RootInterface.Bounds.Y1 + 8;
+        alignment.Bottom := RootInterface.Bounds.Y1 + 159;
 
         Self.CompassCircleOffset := [-2, 14];
         Self.XPCircleOffset := [-50, 32];
@@ -515,10 +517,10 @@ begin
 
     ERSClientMode.FIXED:
       begin
-        alignment.Left := RootInterface.X2 - 195;
-        alignment.Right := RootInterface.X2 - 50;
-        alignment.Top := RootInterface.Y1 + 8;
-        alignment.Bottom := RootInterface.Y1 + 159;
+        alignment.Left := RootInterface.Bounds.X2 - 195;
+        alignment.Right := RootInterface.Bounds.X2 - 50;
+        alignment.Top := RootInterface.Bounds.Y1 + 8;
+        alignment.Bottom := RootInterface.Bounds.Y1 + 159;
 
         Self.CompassCircleOffset := [-8, 12];
         Self.XPCircleOffset := [-50, 26];
@@ -1722,7 +1724,7 @@ begin
   bitmap.ReplaceColor(284358,0);
   bitmap.ReplaceColor(1127261,0);
 
-  bitmap.DrawPolyFilled(Self.GetPolygon().Offset(-Self.X1, -Self.Y1), True, 0);
+  bitmap.DrawPolyFilled(Self.GetPolygon().Offset(-Self.Bounds.X1, -Self.Bounds.Y1), True, 0);
 
   bitmap.FindColors(tpa, 0);
   bitmap.Blend(tpa.Sorted(bitmap.GetCenter()), 5);

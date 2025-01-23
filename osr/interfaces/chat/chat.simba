@@ -76,10 +76,10 @@ procedure TRSChat.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
 begin
-  alignment.Left   := ChatButtons.X1;
-  alignment.Right  := ChatButtons.X2;
-  alignment.Top    := ChatButtons.Y1 - 142;
-  alignment.Bottom := ChatButtons.Y1 - 1;
+  alignment.Left   := ChatButtons.Bounds.X1;
+  alignment.Right  := ChatButtons.Bounds.X2;
+  alignment.Top    := ChatButtons.Bounds.Y1 - 142;
+  alignment.Bottom := ChatButtons.Bounds.Y1 - 1;
   alignment.MaxWidth := 0;
   alignment.MaxHeight := 0;
 
@@ -87,7 +87,7 @@ begin
 
   Self.ScrollArea := Self.Bounds;
 
-  Self.LineBoxes := Grid(1, 9, Self.Width - 35, 13, [0, 1], [Self.X1 + 10, Self.Y1 + 8]);
+  Self.LineBoxes := Grid(1, 9, Self.Width - 35, 13, [0, 1], [Self.Bounds.X1 + 10, Self.Bounds.Y1 + 8]);
   Self.LineBoxes[CHAT_INPUT_LINE].Y2 += 2;
 end;
 

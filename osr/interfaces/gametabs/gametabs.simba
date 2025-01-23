@@ -25,7 +25,7 @@ begin
   case RSClient.Mode of
     ERSClientMode.FIXED, ERSClientMode.RESIZABLE_CLASSIC:
     begin
-      tmp := Grid(7, 2, 30, 33, [3, 265], [Self.X1 + 6, Self.Y1 + 1]);
+      tmp := Grid(7, 2, 30, 33, [3, 265], [Self.Bounds.X1 + 6, Self.Bounds.Y1 + 1]);
       for i := 0 to High(tmp) do
         Self.Boxes[ERSGameTab(i)] := tmp[i];
     end;
@@ -35,7 +35,7 @@ begin
         // One row
         if (RootInterface.Width >= 948) then
         begin
-          tmp := Grid(14, 1, 30, 33, [3, 0], [Self.X1 - 197, Self.Y2 - 70]);
+          tmp := Grid(14, 1, 30, 33, [3, 0], [Self.Bounds.X1 - 197, Self.Bounds.Y2 - 70]);
 
           for i := 0 to Ord(ERSGameTab.MAGIC) do
             Self.Boxes[ERSGameTab(i)] := tmp[i];
@@ -46,14 +46,14 @@ begin
         else
         begin
           // Two rows
-          tmp := Grid(7, 2, 30, 33, [3, 3], [Self.X1, Self.Y2 - 70]);
+          tmp := Grid(7, 2, 30, 33, [3, 3], [Self.Bounds.X1, Self.Bounds.Y2 - 70]);
           for i := 0 to High(tmp) do
             Self.Boxes[ERSGameTab(i)] := tmp[i];
         end;
 
         // Logout button is moved to top right corner
         Self.Boxes[ERSGameTab(7)] := tmp[10];
-        Self.Boxes[ERSGameTab(10)] := [RootInterface.X2 - 19, RootInterface.Y1 + 9, RootInterface.X2 - 10, RootInterface.Y1 + 18];
+        Self.Boxes[ERSGameTab(10)] := [RootInterface.Bounds.X2 - 19, RootInterface.Bounds.Y1 + 9, RootInterface.Bounds.X2 - 10, RootInterface.Bounds.Y1 + 18];
       end;
   end;
 end;
@@ -117,28 +117,28 @@ procedure TRSGameTabs.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
 begin
-  alignment.Bottom := RootInterface.Y2;
+  alignment.Bottom := RootInterface.Bounds.Y2;
 
   case RSClient.Mode of
     ERSClientMode.FIXED:
     begin
-      alignment.Left := RootInterface.X2 - 242;
-      alignment.Right := RootInterface.X2 - 2;
-      alignment.Top := RootInterface.Y2 - 334;
+      alignment.Left := RootInterface.Bounds.X2 - 242;
+      alignment.Right := RootInterface.Bounds.X2 - 2;
+      alignment.Top := RootInterface.Bounds.Y2 - 334;
     end;
 
     ERSClientMode.RESIZABLE_CLASSIC:
     begin
-      alignment.Left := RootInterface.X2 - 240;
-      alignment.Right := RootInterface.X2;
-      alignment.Top := RootInterface.Y2 - 334;
+      alignment.Left := RootInterface.Bounds.X2 - 240;
+      alignment.Right := RootInterface.Bounds.X2;
+      alignment.Top := RootInterface.Bounds.Y2 - 334;
     end;
 
     ERSClientMode.RESIZABLE_MODERN:
     begin
-      alignment.Left := RootInterface.X2 - 230;
-      alignment.Right := RootInterface.X2;
-      alignment.Top := RootInterface.Y2 - 346;
+      alignment.Left := RootInterface.Bounds.X2 - 230;
+      alignment.Right := RootInterface.Bounds.X2;
+      alignment.Top := RootInterface.Bounds.Y2 - 346;
     end;
   end;
 
@@ -147,9 +147,8 @@ begin
   //Needed because depending on the client width the tabs stack into row(s)
   if (RSClient.Mode = ERSClientMode.RESIZABLE_MODERN) and (RootInterface.Width >= 948) then
   begin
-    Self.Y1 += 36;
-    Self.Y2 += 36;
-    Self.Bounds := Box(Self.X1, Self.Y1, Self.X2, Self.Y2);
+    Self.Bounds.Y1 += 36;
+    Self.Bounds.Y2 += 36;
     Self.Rectangle := Self.Bounds.ToRectangle();
     Self.Center := Self.Bounds.Middle();
     Self.Width := Self.Bounds.Width();

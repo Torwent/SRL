@@ -36,9 +36,9 @@ var
 begin
   SetLength(Boxes, 7);
   for i := 0 to High(Boxes) do
-    Boxes[i] := [(Self.X1 + 3 + (i * 62)), Self.Y1, (Self.X1 + 58 + (i * 62)), (Self.Y2 - 1)];
+    Boxes[i] := [(Self.Bounds.X1 + 3 + (i * 62)), Self.Bounds.Y1, (Self.Bounds.X1 + 58 + (i * 62)), (Self.Bounds.Y2 - 1)];
 
-  Boxes += [[(Self.X1 + 436), Self.Y1, (Self.X1 + 515), (Self.Y2 - 1)]];
+  Boxes += [[(Self.Bounds.X1 + 436), Self.Bounds.Y1, (Self.Bounds.X1 + 515), (Self.Bounds.Y2 - 1)]];
 
   for i := 0 to High(Boxes) do
     Result += [[CTS1(1555, 6), CTS1(5399922, 0), CTS1(795452, 0)], i, Boxes[i], Boxes[i].Middle];
@@ -85,17 +85,17 @@ end;
 procedure TRSChatButtons.Setup; override;
 begin
   inherited;
-  Self.Name := 'Chat Buttons';
+  Self.Name := 'ChatButtons';
 end;
 
 procedure TRSChatButtons.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
 begin
-  alignment.Left := RootInterface.X1;
-  alignment.Right := RootInterface.X1 + 518;
-  alignment.Top := RootInterface.Y2 - 22;
-  alignment.Bottom := RootInterface.Y2;
+  alignment.Left := RootInterface.Bounds.X1;
+  alignment.Right := RootInterface.Bounds.X1 + 518;
+  alignment.Top := RootInterface.Bounds.Y2 - 22;
+  alignment.Bottom := RootInterface.Bounds.Y2;
   Self.SetupAlignment(alignment);
 end;
 

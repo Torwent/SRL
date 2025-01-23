@@ -42,7 +42,7 @@ TRSEquipment = type TRSItemInterface;
 ```
 Main equipment type reponsible for handling it.
 *)
-  TRSEquipment = type TRSItemInterface;
+  TRSEquipment = type TRSItemGameTab;
 
 
 (*
@@ -76,15 +76,15 @@ procedure TRSEquipment.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
 begin
-  alignment.Left := GameTab.X1;
-  alignment.Right := GameTab.X2;
-  alignment.Top := GameTab.Y1;
-  alignment.Bottom := GameTab.Y2;
+  alignment.Left := GameTab.Bounds.X1;
+  alignment.Right := GameTab.Bounds.X2;
+  alignment.Top := GameTab.Bounds.Y1;
+  alignment.Bottom := GameTab.Bounds.Y2;
 
   Self.SetupAlignment(alignment);
 
-  Self.SlotBoxes := Grid(3,2, 35, 35, [6, 4], [Self.X1+33, Self.Y1+5]) +
-                    Grid(3,3, 35, 35, [21, 5], [Self.X1+18, Self.Y1+83]);
+  Self.SlotBoxes := Grid(3,2, 35, 35, [6, 4], [Self.Bounds.X1+33, Self.Bounds.Y1+5]) +
+                    Grid(3,3, 35, 35, [21, 5], [Self.Bounds.X1+18, Self.Bounds.Y1+83]);
 
   Delete(Self.SlotBoxes, 0, 1);
   Delete(Self.SlotBoxes, 8, 1);

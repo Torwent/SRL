@@ -18,20 +18,20 @@ var
 begin
   case RSClient.Mode of
     ERSClientMode.FIXED, ERSClientMode.RESIZABLE_CLASSIC:
-      begin
-        alignment.Left := GameTabs.X1 + 28;
-        alignment.Right := GameTabs.X2 - 29;
-        alignment.Top := GameTabs.Y1 + 36;
-        alignment.Bottom := GameTabs.Y2 - 37;
-      end;
+    begin
+      alignment.Left := GameTabs.Bounds.X1 + 28;
+      alignment.Right := GameTabs.Bounds.X2 - 29;
+      alignment.Top := GameTabs.Bounds.Y1 + 36;
+      alignment.Bottom := GameTabs.Bounds.Y2 - 37;
+    end;
 
     ERSClientMode.RESIZABLE_MODERN:
-      begin
-        alignment.Left := GameTabs.X1 + 37;
-        alignment.Right := GameTabs.X2 - 10;
-        alignment.Top := GameTabs.Y1 + 6;
-        alignment.Bottom := GameTabs.Y2 - 78;
-      end;
+    begin
+      alignment.Left := GameTabs.Bounds.X1 + 37;
+      alignment.Right := GameTabs.Bounds.X2 - 10;
+      alignment.Top := GameTabs.Bounds.Y1 + 6;
+      alignment.Bottom := GameTabs.Bounds.Y2 - 78;
+    end;
   end;
 
   Self.SetupAlignment(alignment);
@@ -58,3 +58,9 @@ begin
   GameTab.Draw(bitmap);
 end;
 
+type
+  TRSItemGameTab = record(TRSInterface)
+    Items: TRSItemInterface;
+    SlotBoxes: TBoxArray;
+  end;
+  PRSItemGameTab = ^TRSItemGameTab;
