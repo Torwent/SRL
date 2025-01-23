@@ -11,7 +11,7 @@ Methods to interact with the minimap.
 type
   ERSMinimapDot = (PLAYER, NPC, ITEM);
   ERSMinimapDots = set of ERSMinimapDot;
-  ERSMinimapCircle = (COMPASS, XP, HP, PRAYER, RUN, SPECIAL_ATTACK);
+  ERSMinimapOrb = (COMPASS, EXPERIENCE, HITPOINTS, PRAYER, ENERGY, SPECIAL_ATTACK);
 
 (*
 (TRSMinimap)=
@@ -31,124 +31,10 @@ end;
 TRSMinimap type used to interact with the minimap
 *)
   TRSMinimap = record(TRSInterface)
-    Circles: array [ERSMinimapCircle] of TCircle;
-    CompassCircleOffset: TPoint;
-    XPCircleOffset: TPoint;
-    HitpointsCircleOffset: TPoint;
-    PrayerCircleOffset: TPoint;
-    RunCircleOffset: TPoint;
-    SpecAttackCircleOffset: TPoint;
-    PolygonOffset: TPointArray;
+    Orbs: TCircleArray;
+    Polygon: TPointArray;
     FlagBitmap: Int32;
   end;
-
-(*
-## Minimap.GetCompassCircle
-```pascal
-function TRSMinimap.GetCompassCircle(): TCircle;
-```
-Returns the compass circle.
-
-Example:
-```pascal
-circle := Minimap.GetCompassCircle();
-Debug(circle.ToTPA());
-```
-*)
-function TRSMinimap.GetCompassCircle(): TCircle;
-begin
-  Result := [Self.Bounds.X1 + Self.CompassCircleOffset.X, Self.Bounds.Y1 + Self.CompassCircleOffset.Y, 17];
-end;
-
-(*
-## Minimap.GetXPCircle
-```pascal
-function TRSMinimap.GetXPCircle(): TCircle;
-```
-Returns the xp bar circle.
-
-Example:
-```pascal
-circle := Minimap.GetXPCircle();
-Debug(circle.ToTPA());
-```
-*)
-function TRSMinimap.GetXPCircle(): TCircle;
-begin
-  Result := [Self.Bounds.X1 + Self.XPCircleOffset.X + 10, Self.Bounds.Y1 + Self.XPCircleOffset.Y, 11];
-end;
-
-(*
-## Minimap.GetHPCircle
-```pascal
-function TRSMinimap.GetHPCircle(): TCircle;
-```
-Returns the hp circle.
-
-Example:
-```pascal
-circle := Minimap.GetHPCircle();
-Debug(circle.ToTPA());
-```
-*)
-function TRSMinimap.GetHPCircle(): TCircle;
-begin
-  Result := [Self.Bounds.X1 + Self.HitpointsCircleOffset.X, Self.Bounds.Y1 + Self.HitpointsCircleOffset.Y, 12];
-end;
-
-(*
-## Minimap.GetPrayerCircle
-```pascal
-function TRSMinimap.GetPrayerCircle(): TCircle;
-```
-Returns the prayer circle.
-
-Example:
-```pascal
-circle := Minimap.GetPrayerCircle();
-Debug(circle.ToTPA());
-```
-*)
-function TRSMinimap.GetPrayerCircle(): TCircle;
-begin
-  Result := [Self.Bounds.X1 + Self.PrayerCircleOffset.X, Self.Bounds.Y1 + Self.PrayerCircleOffset.Y, 12];
-end;
-
-(*
-## Minimap.GetRunCircle
-```pascal
-function TRSMinimap.GetRunCircle(): TCircle;
-```
-Returns the run energy circle.
-
-Example:
-```pascal
-circle := Minimap.GetRunCircle();
-Debug(circle.ToTPA());
-```
-*)
-function TRSMinimap.GetRunCircle(): TCircle;
-begin
-  Result := [Self.Bounds.X1 + Self.RunCircleOffset.X, Self.Bounds.Y1 + Self.RunCircleOffset.Y, 12];
-end;
-
-(*
-## Minimap.GetSpecAttackCircle
-```pascal
-function TRSMinimap.GetSpecAttackCircle(): TCircle;
-```
-Returns the special attack circle.
-
-Example:
-```pascal
-circle := Minimap.GetSpecAttackCircle();
-Debug(circle.ToTPA());
-```
-*)
-function TRSMinimap.GetSpecAttackCircle(): TCircle;
-begin
-  Result := [Self.Bounds.X1 + Self.SpecAttackCircleOffset.X, Self.Bounds.Y1 + Self.SpecAttackCircleOffset.Y, 12];
-end;
 
 (*
 ## Minimap.GetOrbLevel
@@ -162,9 +48,9 @@ Example:
 WriteLn Minimap.GetOrbLevel(Minimap.GetSpecAttackCircle());
 ```
 *)
-function TRSMinimap.GetOrbLevel(Orb: TCircle): Int32;
+function TRSMinimap.GetOrbLevel(orb: ERSMinimapOrb): Int32;
 begin
-  Result := OCR.RecognizeNumber([Orb.X-35, Orb.Y-1, Orb.X-15, Orb.Y+9], TOCRShadowFilter.Create(), RS_FONT_PLAIN_11);
+  Result := OCR.RecognizeNumber([Self.Orbs[orb].X-35, Self.Orbs[orb].Y-1, Self.Orbs[orb].X-15, Self.Orbs[orb].Y+9], TOCRShadowFilter.Create(), RS_FONT_PLAIN_11);
 end;
 
 (*
@@ -181,7 +67,7 @@ WriteLn Minimap.GetRunEnergy();
 *)
 function TRSMinimap.GetRunEnergy(): Int32;
 begin
-  Result := Self.GetOrbLevel(GetRunCircle());
+  Result := Self.GetOrbLevel(ERSMinimapOrb.ENERGY);
 end;
 
 (*
@@ -198,7 +84,7 @@ WriteLn Minimap.GetHPLevel();
 *)
 function TRSMinimap.GetHPLevel(): Int32;
 begin
-  Result := Self.GetOrbLevel(Self.GetHPCircle());
+  Result := Self.GetOrbLevel(ERSMinimapOrb.HITPOINTS);
 end;
 
 (*
@@ -215,15 +101,15 @@ WriteLn Minimap.GetHPPercent();
 *)
 function TRSMinimap.GetHPPercent(): Int32;
 var
-  TPA: TPointArray;
-  Circle: TCircle;
+  tpa: TPointArray;
+  circle: TCircle;
 begin
-  Circle := Self.GetHPCircle();
-  if SRL.FindColors(TPA, CTS1(1250067, 20), Circle.Bounds) > 0 then
-    TPA := TPA.FilterDist(0, Circle.Radius, Circle.X, Circle.Y);
+  circle := Self.Orbs[ERSMinimapOrb.HITPOINTS];
+  if SRL.FindColors(tpa, CTS1(1250067, 20), circle.Bounds) > 0 then
+    tpa := tpa.FilterDist(0, circle.Radius, circle.X, circle.Y);
 
-  with TPA.Bounds() do
-    Result := 100 - Ceil((Y2 - Y1) / (Circle.Bounds.Y2 - Circle.Bounds.Y1) * 100);
+  with tpa.Bounds() do
+    Result := 100 - Ceil((Y2 - Y1) / (circle.Bounds.Y2 - circle.Bounds.Y1) * 100);
 end;
 
 (*
@@ -240,7 +126,7 @@ WriteLn Minimap.GetPrayerLevel();
 *)
 function TRSMinimap.GetPrayerLevel(): Int32;
 begin
-  Result := Self.GetOrbLevel(Self.GetPrayerCircle);
+  Result := Self.GetOrbLevel(ERSMinimapOrb.PRAYER);
 end;
 
 (*
@@ -257,15 +143,15 @@ WriteLn Minimap.GetPrayerPercent();
 *)
 function TRSMinimap.GetPrayerPercent(): Int32;
 var
-  TPA: TPointArray;
-  Circle: TCircle;
+  tpa: TPointArray;
+  circle: TCircle;
 begin
-  Circle := Self.GetPrayerCircle();
-  if SRL.FindColors(TPA, CTS2(1250067, 4, 0, 0), Circle.Bounds) > 0 then
-    TPA := TPA.FilterDist(0, Circle.Radius, Circle.X, Circle.Y);
+  circle := Self.Orbs[ERSMinimapOrb.PRAYER];
+  if SRL.FindColors(tpa, CTS2(1250067, 4, 0, 0), circle.Bounds) > 0 then
+    tpa := tpa.FilterDist(0, circle.Radius, circle.X, circle.Y);
 
-  with TPA.Bounds() do
-    Result := 100 - Ceil((Y2 - Y1) / (Circle.Bounds.Y2 - Circle.Bounds.Y1) * 100);
+  with tpa.Bounds() do
+    Result := 100 - Ceil((Y2 - Y1) / (circle.Bounds.Y2 - circle.Bounds.Y1) * 100);
 end;
 
 (*
@@ -282,25 +168,7 @@ WriteLn Minimap.GetSpecLevel();
 *)
 function TRSMinimap.GetSpecLevel(): Int32;
 begin
-  Result := Self.GetOrbLevel(Self.GetSpecAttackCircle);
-end;
-
-
-(*
-## Minimap.GetPolygon
-```pascal
-function TRSMinimap.GetPolygon(): TPointArray;
-```
-Returns the minimap polygon which is not a perfect circle.
-
-Example:
-```pascal
-Debug(Minimap.GetPolygon().Connect());
-```
-*)
-function TRSMinimap.GetPolygon(): TPointArray;
-begin
-  Result := Self.PolygonOffset.Offset(Self.Center);
+  Result := Self.GetOrbLevel(ERSMinimapOrb.SPECIAL_ATTACK);
 end;
 
 
@@ -325,7 +193,7 @@ var
   dotpts: TPointArray;
   g: T2DPointArray;
 begin
-  with Self.GetCompassCircle() do
+  with Self.Orbs[ERSMinimapOrb.COMPASS] do
   begin
     if SRL.FindColors(dotpts, CTS1(2565532, 50), Bounds()) then // red
     begin
@@ -461,21 +329,21 @@ procedure TRSMinimap.Draw(Bitmap: TMufasaBitmap); override;
 begin
   inherited;
 
-  with Self.GetCompassCircle() do
+  with Self.Orbs[ERSMinimapOrb.COMPASS] do
     Bitmap.DrawCircle([X, Y], Radius, $00FFFF);
-  with Self.GetXPCircle() do
+  with Self.Orbs[ERSMinimapOrb.EXPERIENCE] do
     Bitmap.DrawCircle([X, Y], Radius, $00FFFF);
-  with Self.GetHPCircle() do
+  with Self.Orbs[ERSMinimapOrb.HITPOINTS] do
     Bitmap.DrawCircle([X, Y], Radius, $00FFFF);
-  with Self.GetPrayerCircle() do
+  with Self.Orbs[ERSMinimapOrb.PRAYER] do
     Bitmap.DrawCircle([X, Y], Radius, $00FFFF);
-  with Self.GetRunCircle() do
+  with Self.Orbs[ERSMinimapOrb.ENERGY] do
     Bitmap.DrawCircle([X, Y], Radius, $00FFFF);
-  with Self.GetSpecAttackCircle() do
+  with Self.Orbs[ERSMinimapOrb.SPECIAL_ATTACK] do
     Bitmap.DrawCircle([X, Y], Radius, $00FFFF);
 
-  Bitmap.DrawPoly(Self.GetPolygon(), $0000FF);
-  Bitmap.DrawTPA(Self.GetPolygon(), $00FF00);
+  Bitmap.DrawPoly(Self.Polygon, $0000FF);
+  Bitmap.DrawTPA(Self.Polygon, $00FF00);
   Bitmap.SetPixel(Self.Center.X, Self.Center.Y, $0000FF);
 end;
 
@@ -491,6 +359,7 @@ begin
   Self.Name := 'Minimap';
   Self.FlagBitmap := BitmapFromString(2, 2, 'meJxjYPgvaBzLEnYMSAIAFJIDYg==');
 
+  SetLength(Self.Orbs, Ord(High(ERSMinimapOrb))+1);
   AddOnTerminate(@Self.Free);
 end;
 
@@ -500,39 +369,49 @@ var
 begin
   case RSClient.Mode of
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
-      begin
-        alignment.Left := RootInterface.Bounds.X2 - 157;
-        alignment.Right := RootInterface.Bounds.X2 - 6;
-        alignment.Top := RootInterface.Bounds.Y1 + 8;
-        alignment.Bottom := RootInterface.Bounds.Y1 + 159;
-
-        Self.CompassCircleOffset := [-2, 14];
-        Self.XPCircleOffset := [-50, 32];
-        Self.HitpointsCircleOffset := [-13, 55];
-        Self.PrayerCircleOffset := [-13, 90];
-        Self.RunCircleOffset := [-3, 121];
-        Self.SpecAttackCircleOffset := [19, 148];
-        Self.PolygonOffset := [[0, -76], [21, -73], [40, -64], [56, -51], [68, -33], [75, -1], [68, 31], [50, 43], [40, 62], [21, 71], [0, 74], [-21, 71], [-40, 62], [-56, 49], [-68, 31], [-75, -1], [-68, -33], [-56, -51], [-40, -64], [-21, -73]];
-      end;
+    begin
+      alignment.Left := RootInterface.Bounds.X2 - 157;
+      alignment.Right := RootInterface.Bounds.X2 - 6;
+      alignment.Top := RootInterface.Bounds.Y1 + 8;
+      alignment.Bottom := RootInterface.Bounds.Y1 + 159;
+    end;
 
     ERSClientMode.FIXED:
-      begin
-        alignment.Left := RootInterface.Bounds.X2 - 195;
-        alignment.Right := RootInterface.Bounds.X2 - 50;
-        alignment.Top := RootInterface.Bounds.Y1 + 8;
-        alignment.Bottom := RootInterface.Bounds.Y1 + 159;
-
-        Self.CompassCircleOffset := [-8, 12];
-        Self.XPCircleOffset := [-50, 26];
-        Self.HitpointsCircleOffset := [-13, 49];
-        Self.PrayerCircleOffset := [-13, 84];
-        Self.RunCircleOffset := [-3, 116];
-        Self.SpecAttackCircleOffset := [19, 142];
-        Self.PolygonOffset := [[21, -71], [39, -62], [55, -49], [67, -32], [70, 0], [66, 19], [57, 32], [41, 43], [20, 58], [12, 71], [0, 74], [-11, 72], [-24, 55], [-47, 39], [-60, 31], [-66, 22], [-71, 0], [-72, -14], [-67, -32], [-55, -49], [-39, -62], [-21, -71], [0, -74]];
-      end;
+    begin
+      alignment.Left := RootInterface.Bounds.X2 - 195;
+      alignment.Right := RootInterface.Bounds.X2 - 50;
+      alignment.Top := RootInterface.Bounds.Y1 + 8;
+      alignment.Bottom := RootInterface.Bounds.Y1 + 159;
+    end;
   end;
 
   Self.SetupAlignment(alignment);
+
+  case RSClient.Mode of
+    ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
+    begin
+      Self.Orbs[ERSMinimapOrb.COMPASS]        := [Self.Bounds.X1 - 2,  Self.Bounds.Y1 + 14,  17];
+      Self.Orbs[ERSMinimapOrb.EXPERIENCE]     := [Self.Bounds.X1 - 40, Self.Bounds.Y1 + 32,  11];
+      Self.Orbs[ERSMinimapOrb.HITPOINTS]      := [Self.Bounds.X1 - 13, Self.Bounds.Y1 + 55,  12];
+      Self.Orbs[ERSMinimapOrb.PRAYER]         := [Self.Bounds.X1 - 13, Self.Bounds.Y1 + 90,  12];
+      Self.Orbs[ERSMinimapOrb.ENERGY]         := [Self.Bounds.X1 - 3,  Self.Bounds.Y1 + 121, 12];
+      Self.Orbs[ERSMinimapOrb.SPECIAL_ATTACK] := [Self.Bounds.X1 + 19, Self.Bounds.Y1 + 148, 12];
+      Self.Polygon := [[0, -76], [21, -73], [40, -64], [56, -51], [68, -33], [75, -1], [68, 31], [50, 43], [40, 62], [21, 71], [0, 74], [-21, 71], [-40, 62], [-56, 49], [-68, 31], [-75, -1], [-68, -33], [-56, -51], [-40, -64], [-21, -73]];
+    end;
+
+    ERSClientMode.FIXED:
+    begin
+      Self.Orbs[ERSMinimapOrb.COMPASS]        := [Self.Bounds.X1 - 8,  Self.Bounds.Y1 + 12,  17];
+      Self.Orbs[ERSMinimapOrb.EXPERIENCE]     := [Self.Bounds.X1 - 40, Self.Bounds.Y1 + 26,  11];
+      Self.Orbs[ERSMinimapOrb.HITPOINTS]      := [Self.Bounds.X1 - 13, Self.Bounds.Y1 + 49,  12];
+      Self.Orbs[ERSMinimapOrb.PRAYER]         := [Self.Bounds.X1 - 13, Self.Bounds.Y1 + 84,  12];
+      Self.Orbs[ERSMinimapOrb.ENERGY]         := [Self.Bounds.X1 - 3,  Self.Bounds.Y1 + 116, 12];
+      Self.Orbs[ERSMinimapOrb.SPECIAL_ATTACK] := [Self.Bounds.X1 + 19, Self.Bounds.Y1 + 142, 12];
+      Self.Polygon := [[21, -71], [39, -62], [55, -49], [67, -32], [70, 0], [66, 19], [57, 32], [41, 43], [20, 58], [12, 71], [0, 74], [-11, 72], [-24, 55], [-47, 39], [-60, 31], [-66, 22], [-71, 0], [-72, -14], [-67, -32], [-55, -49], [-39, -62], [-21, -71], [0, -74]];
+    end;
+  end;
+
+  Self.Polygon := Self.Polygon.Offset(Self.Center)
 end;
 
 
@@ -546,12 +425,12 @@ Checks if a point is on the minimap.
 *)
 function TRSMinimap.IsPointOn(p: TPoint): Boolean;
 begin
-  Result := SRL.PointInPoly(p, Self.GetPolygon());
+  Result := SRL.PointInPoly(p, Self.Polygon);
 end;
 
 function TRSMinimap.IsPointOn(p: TPoint; expand: Int32): Boolean; overload;
 begin
-  Result := SRL.PointInPoly(p, ExpandPolygon(Self.GetPolygon(), expand));
+  Result := SRL.PointInPoly(p, ExpandPolygon(Self.Polygon, expand));
 end;
 
 
@@ -617,38 +496,38 @@ Writeln Minimap.IsSpecWeapon();
 *)
 function TRSMinimap.IsPoisoned(): Boolean;
 begin
-  Result := SRL.CountColor(CTS0(16391, 3), Self.GetHPCircle().Bounds()) > 0;
+  Result := SRL.CountColor(CTS0(16391, 3), Self.Orbs[ERSMinimapOrb.HITPOINTS].Bounds()) > 0;
 end;
 
 function TRSMinimap.IsEnvenomed(): Boolean;
 begin
-  Result := SRL.CountColor(CTS0(1515790, 9), Self.GetHPCircle().Bounds()) > 0;
+  Result := SRL.CountColor(CTS0(1515790, 9), Self.Orbs[ERSMinimapOrb.HITPOINTS].Bounds()) > 0;
 end;
 
 function TRSMinimap.IsRunEnabled(): Boolean;
 begin
-  Result := SRL.CountColor(CTS2(4211520, 6, 2.84, 0.14), Self.GetRunCircle().Bounds) = 0;
+  Result := SRL.CountColor(CTS2(4211520, 6, 2.84, 0.14), Self.Orbs[ERSMinimapOrb.ENERGY].Bounds) = 0;
 end;
 
 function TRSMinimap.IsPrayerEnabled(): Boolean;
 begin
-  Result := SRL.CountColor(CTS0(1168105, 33), Self.GetPrayerCircle().Bounds()) > 20;
+  Result := SRL.CountColor(CTS0(1168105, 33), Self.Orbs[ERSMinimapOrb.PRAYER].Bounds()) > 20;
 end;
 
 function TRSMinimap.HasStamina(): Boolean;
 begin
-  Result := SRL.CountColor(CTS0(2709951, 38), Self.GetRunCircle().Bounds()) > 0;
+  Result := SRL.CountColor(CTS0(2709951, 38), Self.Orbs[ERSMinimapOrb.ENERGY].Bounds()) > 0;
 end;
 
 function TRSMinimap.IsSpecEnabled(): Boolean;
 begin
-  Result := SRL.CountColor(CTS2(8682326, 16, 0.03, 1.15), Self.GetSpecAttackCircle.Bounds) > 1;
+  Result := SRL.CountColor(CTS2(8682326, 16, 0.03, 1.15), Self.Orbs[ERSMinimapOrb.SPECIAL_ATTACK].Bounds()) > 1;
 end;
 
 function TRSMinimap.IsSpecWeapon(): Boolean;
 begin
-  Result := ((SRL.CountColor(CTS2(8480786, 19, 0.05, 1.36), Self.GetSpecAttackCircle.Bounds) > 0) or
-            Self.IsSpecEnabled);
+  Result := ((SRL.CountColor(CTS2(8480786, 19, 0.05, 1.36), Self.Orbs[ERSMinimapOrb.SPECIAL_ATTACK].Bounds()) > 0) or
+            Self.IsSpecEnabled());
 end;
 
 
@@ -671,7 +550,7 @@ var
 begin
   if Self.IsPoisoned() then
   begin
-    Mouse.Click(Self.GetHPCircle(), MOUSE_LEFT);
+    Mouse.Click(Self.Orbs[ERSMinimapOrb.HITPOINTS], MOUSE_LEFT);
 
     T := GetTickCount() + Round(SRL.TruncatedGauss(1000, 2000));
     while (T > GetTickCount()) do
@@ -702,7 +581,7 @@ var
 begin
   if not Self.IsRunEnabled() then
   begin
-    Mouse.Click(Self.GetRunCircle(), MOUSE_LEFT);
+    Mouse.Click(Self.Orbs[ERSMinimapOrb.ENERGY], MOUSE_LEFT);
 
     T := GetTickCount() + Round(SRL.TruncatedGauss(1000, 2000));
     while (T > GetTickCount()) do
@@ -733,7 +612,7 @@ var
 begin
   if Self.IsRunEnabled() then
   begin
-    Mouse.Click(Self.GetRunCircle(), MOUSE_LEFT);
+    Mouse.Click(Self.Orbs[ERSMinimapOrb.ENERGY], MOUSE_LEFT);
 
     T := GetTickCount() + Round(SRL.TruncatedGauss(1000, 2000));
     while (T > GetTickCount()) do
@@ -765,7 +644,7 @@ var
 begin
   if not Self.IsPrayerEnabled() then
   begin
-    Mouse.Click(Self.GetPrayerCircle(), MOUSE_LEFT);
+    Mouse.Click(Self.Orbs[ERSMinimapOrb.PRAYER], MOUSE_LEFT);
 
     T := GetTickCount() + Round(SRL.TruncatedGauss(1000, 2000));
     while (T > GetTickCount()) do
@@ -796,7 +675,7 @@ var
 begin
   if Self.IsPrayerEnabled() then
   begin
-    Mouse.Click(Self.GetPrayerCircle(), MOUSE_LEFT);
+    Mouse.Click(Self.Orbs[ERSMinimapOrb.PRAYER], MOUSE_LEFT);
 
     T := GetTickCount() + Round(SRL.TruncatedGauss(1000, 2000));
     while (T > GetTickCount()) do
@@ -832,7 +711,7 @@ begin
   Result := Self.IsSpecEnabled;
   if not Result then
   begin
-    Mouse.Click(Self.GetSpecAttackCircle, MOUSE_LEFT);
+    Mouse.Click(Self.Orbs[ERSMinimapOrb.SPECIAL_ATTACK], MOUSE_LEFT);
 
     T := GetTickCount() + Round(SRL.TruncatedGauss(1000, 2000));
     while (T > GetTickCount()) do
@@ -865,7 +744,7 @@ begin
 
   if Result then
   begin
-    Mouse.Click(Self.GetSpecAttackCircle, MOUSE_LEFT);
+    Mouse.Click(Self.Orbs[ERSMinimapOrb.SPECIAL_ATTACK], MOUSE_LEFT);
 
     T := GetTickCount() + Round(SRL.TruncatedGauss(1000, 2000));
     while (T > GetTickCount()) do
@@ -1724,7 +1603,7 @@ begin
   bitmap.ReplaceColor(284358,0);
   bitmap.ReplaceColor(1127261,0);
 
-  bitmap.DrawPolyFilled(Self.GetPolygon().Offset(-Self.Bounds.X1, -Self.Bounds.Y1), True, 0);
+  bitmap.DrawPolyFilled(Self.Polygon.Offset(-Self.Bounds.X1, -Self.Bounds.Y1), True, 0);
 
   bitmap.FindColors(tpa, 0);
   bitmap.Blend(tpa.Sorted(bitmap.GetCenter()), 5);

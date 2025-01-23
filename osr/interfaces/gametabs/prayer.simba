@@ -504,10 +504,9 @@ QuickPrayer.Open();
 *)
 function TRSQuickPrayer.Open(): Boolean;
 begin
-  if Self.IsOpen then
-    Exit(True);
+  if Self.IsOpen then Exit(True);
 
-  Mouse.Move(Minimap.GetPrayerCircle);
+  Mouse.Move(Minimap.Orbs[ERSMinimapOrb.PRAYER]);
   ChooseOption.Open;
   if ChooseOption.Select('Setup') then
     Result := Self.IsOpen(2000);

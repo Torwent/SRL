@@ -1357,7 +1357,7 @@ begin
   map.RotateBitmap(-angle, rotated);
   rotated.Crop(Box(rotated.getCenter(), w div 2, h div 2));
 
-  tpa := Minimap.GetPolygon().Offset(-b.X1, -b.Y1);
+  tpa := Minimap.Polygon.Offset(-b.X1, -b.Y1);
   tpa := tpa.Connect().ShapeFill().Grow(2);
   rotated.DrawTPA(tpa.Invert(rotated.Bounds()), $0);
   rotated.SetTransparentColor(0);
