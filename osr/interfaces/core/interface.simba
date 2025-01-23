@@ -503,7 +503,7 @@ var
 
 procedure TSRL.Setup(); override;
 begin
-  RootInterface.Name := 'Root Interface';
+  RootInterface.Name := 'RootInterface';
   inherited;
 end;
 

@@ -6,7 +6,7 @@
 type
   TRSGameTab = type TRSInterface;
 
-procedure TRSGameTab.Setup; override;
+procedure TRSGameTab.Setup(); override;
 begin
   inherited;
   Self.Name := 'GameTab';

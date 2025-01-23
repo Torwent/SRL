@@ -21,7 +21,6 @@ procedure TRSGameTabs.SetTabBoxes();
 var
   tmp: TBoxArray;
   i: Int32;
-  tab: ERSGameTab;
 begin
   case RSClient.Mode of
     ERSClientMode.FIXED, ERSClientMode.RESIZABLE_CLASSIC:
