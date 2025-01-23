@@ -34,7 +34,6 @@ procedure TRSInterface.SetupAlignment(alignment: TRSInterfaceAlignment);
 var
   length, center, half, halfMax: Single;
 begin
-  Self.DebugLn('Setting up alignment.');
   if alignment = [0,0,0,0,0,0] then Self.Fatal('No anchors set for this alignment');
 
   if alignment.MaxWidth > 0 then

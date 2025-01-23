@@ -39,7 +39,10 @@ begin
 
   Self.Name := 'XPBar';
   SetLength(Self.Alignments, 3);
+end;
 
+procedure TRSXPBar.SetupAlignment(); overload;
+begin
   with Self.Alignments[0] do
   begin
     Left := InterfaceArea.X1 + 2;
@@ -69,9 +72,8 @@ begin
     MaxWidth := 0;
     MaxHeight := 0;
   end;
-
-  Self.Alignment := Self.Alignments[0];
 end;
+
 
 (*
 ## XPBar.IsEnabled
@@ -131,15 +133,10 @@ begin
 
   for Self.Alignment in Self.Alignments do
   begin
-    WriteLn 'here';
     Self.SetupAlignment(Self.Alignment);
-    WriteLn 'here1: ' + ToStr(Self.Bounds);
     if SRL.FindColors(tpa, $FFFFFF, Self.Bounds) > 0 then
       Break;
-    WriteLn 'here2';
   end;
-
-  WriteLn 'here3';
 
   if tpa = [] then
   begin
@@ -344,7 +341,7 @@ end;
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-  XPBar.SetupAlignment(XPBar.Alignment);
+  XPBar.SetupAlignment();
 end;
 
 procedure TSRL.Setup(); override;
