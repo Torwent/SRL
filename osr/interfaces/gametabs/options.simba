@@ -22,17 +22,19 @@ begin
   Self.ButtonColors += CTS1(2369440, 5);
 end;
 
-procedure TRSOptions.SetupAlignment(); override;
+procedure TRSOptions.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 var
   boxes: TBoxArray;
   i: Int32;
 begin
-  Self.Alignment.Left := [GameTab.X1, 0];
-  Self.Alignment.Right := [GameTab.X2, 0];
-  Self.Alignment.Top := [GameTab.Y1, 0];
-  Self.Alignment.Bottom := [GameTab.Y2, 0];
+  alignment.Left := GameTab.X1;
+  alignment.Right := GameTab.X2;
+  alignment.Top := GameTab.Y1;
+  alignment.Bottom := GameTab.Y2;
 
-  inherited;
+  Self.SetupAlignment(alignment);
 
   boxes := Grid(3, 1, 55, 24, [9], [Self.X1, Self.Y1 + 5]);
 
@@ -177,10 +179,14 @@ end;
 function TRSOptions.GetCurrentTab(): ERSOptionsTab;
 var
   tab: ERSOptionsTab;
+  count: Integer;
 begin
   for tab := Low(ERSOptionsTab) to High(ERSOptionsTab) do
-    if SRL.CountColor(4741213, Self.Tabs[tab]) < 50 then //finds the one without the bottom white line
+  begin
+    count := SRL.CountColor($48585D, tabs[tab]) + SRL.CountColor($1E2528, tabs[tab]);
+    if count < 50 then //finds the one without the bottom white/black line
       Exit(tab);
+  end;
 end;
 
 function TRSOptions.OpenTab(tab: ERSOptionsTab): Boolean;

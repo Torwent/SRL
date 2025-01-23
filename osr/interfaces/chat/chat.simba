@@ -64,7 +64,7 @@ end;
 (*
 ## Chat.SetupAlignment
 ```pascal
-procedure TRSChat.SetupAlignment(); override;
+procedure TRSChat.SetupAlignment(); overload;
 ```
 Setups up the interface aligment for the current client mode.
 
@@ -72,14 +72,18 @@ Setups up the interface aligment for the current client mode.
 This is automatically called on the **TRSClient.ClientModeChanged** function.
 ```
 *)
-procedure TRSChat.SetupAlignment(); override;
+procedure TRSChat.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
-  Self.Alignment.Left := [ChatButtons.X1, 0];
-  Self.Alignment.Right := [ChatButtons.X2, 0];
-  Self.Alignment.Top := [ChatButtons.Y1, -142];
-  Self.Alignment.Bottom := [ChatButtons.Y1, -1];
+  alignment.Left   := ChatButtons.X1;
+  alignment.Right  := ChatButtons.X2;
+  alignment.Top    := ChatButtons.Y1 - 142;
+  alignment.Bottom := ChatButtons.Y1 - 1;
+  alignment.MaxWidth := 0;
+  alignment.MaxHeight := 0;
 
-  inherited;
+  Self.SetupAlignment(alignment);
 
   Self.ScrollArea := Self.Bounds;
 

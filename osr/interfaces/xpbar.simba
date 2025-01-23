@@ -16,6 +16,7 @@ type
       IsSetup: Boolean;
     end;
 
+    Alignment: TRSInterfaceAlignment;
     Alignments: array of TRSInterfaceAlignment;
     Font: TFontSet;
     IsSetup: Boolean;
@@ -34,36 +35,42 @@ This is automatically called on the **XPBar** variable.
 *)
 procedure TRSXPBar.Setup(); override;
 begin
-  Self.Name := 'XPBar';
+  inherited;
 
+  Self.Name := 'XPBar';
   SetLength(Self.Alignments, 3);
 
   with Self.Alignments[0] do
   begin
-    Left := [InterfaceArea.X1, 2];
-    Right := [InterfaceArea.X1, 141];
-    Top := [InterfaceArea.Y1, 23];
-    Bottom := [InterfaceArea.Y1, 51];
+    Left := InterfaceArea.X1 + 2;
+    Right := InterfaceArea.X1 + 141;
+    Top := InterfaceArea.Y1 + 23;
+    Bottom := InterfaceArea.Y1 + 51;
+    MaxWidth := 0;
+    MaxHeight := 0;
   end;
 
   with Self.Alignments[1] do
   begin
-    Left   := [InterfaceArea.X1];
-    Right  := [InterfaceArea.X2];
-    Top    := [InterfaceArea.Y1, 23];
-    Bottom := [InterfaceArea.Y1, 51];
-    Center.MaxWidth := 140;
+    Left   := InterfaceArea.X1;
+    Right  := InterfaceArea.X2;
+    Top    := InterfaceArea.Y1 + 23;
+    Bottom := InterfaceArea.Y1 + 51;
+    MaxWidth := 140;
+    MaxHeight := 0;
   end;
 
   with Self.Alignments[2] do
   begin
-    Left := [InterfaceArea.X2, -141];
-    Right := [InterfaceArea.X2, -2];
-    Top := [InterfaceArea.Y1, 0];
-    Bottom := [InterfaceArea.Y1, 28];
+    Left := InterfaceArea.X2 - 141;
+    Right := InterfaceArea.X2 - 2;
+    Top := InterfaceArea.Y1;
+    Bottom := InterfaceArea.Y1 + 28;
+    MaxWidth := 0;
+    MaxHeight := 0;
   end;
 
-  inherited;
+  Self.Alignment := Self.Alignments[0];
 end;
 
 (*
@@ -120,15 +127,19 @@ procedure TRSXPBar._Setup();
 var
   tpa: TPointArray;
 begin
-  if not Self.Enable() then
-    Exit;
+  if not Self.Enable() then Exit;
 
   for Self.Alignment in Self.Alignments do
   begin
-    Self.SetupAlignment();
+    WriteLn 'here';
+    Self.SetupAlignment(Self.Alignment);
+    WriteLn 'here1: ' + ToStr(Self.Bounds);
     if SRL.FindColors(tpa, $FFFFFF, Self.Bounds) > 0 then
       Break;
+    WriteLn 'here2';
   end;
+
+  WriteLn 'here3';
 
   if tpa = [] then
   begin
@@ -333,19 +344,17 @@ end;
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-  XPBar.SetupAlignment();
+  XPBar.SetupAlignment(XPBar.Alignment);
 end;
 
 procedure TSRL.Setup(); override;
 begin
   inherited;
-
   XPBar.Setup();
 end;
 
 procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;
 begin
   inherited;
-
   XPBar.Draw(Bitmap);
 end;

@@ -5,14 +5,7 @@
 
 type
   TRSInterfaceAlignment = record
-    Left, Right, Top, Bottom: record
-      Value, Offset: Int32;
-    end;
-
-    Center: record
-      MaxWidth: Int32;
-      MaxHeight: Int32;
-    end;
+    Left, Top, Right, Bottom, MaxWidth, MaxHeight: Int32;
   end;
 
   TRSInterface = record(TSRLBaseRecord)
@@ -26,7 +19,6 @@ type
     Rectangle: TRectangle;
 
     ScrollArea: TBox;
-    Alignment: TRSInterfaceAlignment;
   end;
 
   PRSInterface = ^TRSInterface;
@@ -36,66 +28,45 @@ begin
   Self.Name := 'Interface';
   Self.ButtonColors := [CTS1(5334129, 2), CTS1(2303648, 1), CTS1(657930, 20), CTS1(1514268, 10)];
   Self.ButtonEnabledColors := [CTS1(2369440, 5), CTS1(2700350, 5)];
-
-  Self.Alignment.Left.Value := $FFFFFF;
-  Self.Alignment.Right.Value := $FFFFFF;
-  Self.Alignment.Top.Value := $FFFFFF;
-  Self.Alignment.Bottom.Value := $FFFFFF;
 end;
 
-procedure TRSInterface.SetupAlignment();
+procedure TRSInterface.SetupAlignment(alignment: TRSInterfaceAlignment);
 var
-  side, length, center, half: Single;
+  length, center, half, halfMax: Single;
 begin
-  if Self.Alignment.Left.Value = $FFFFFF then Self.Fatal('No left anchor');
-  if Self.Alignment.Right.Value = $FFFFFF then Self.Fatal('No right anchor');
-  if Self.Alignment.Top.Value = $FFFFFF then Self.Fatal('No top anchor');
-  if Self.Alignment.Bottom.Value = $FFFFFF then Self.Fatal('No bottom anchor');
+  Self.DebugLn('Setting up alignment.');
+  if alignment = [0,0,0,0,0,0] then Self.Fatal('No anchors set for this alignment');
 
-  if Self.Alignment.Center.MaxWidth > 0 then
+  if alignment.MaxWidth > 0 then
   begin
-    side := Self.Alignment.Left.Value + Self.Alignment.Left.Offset;
-    length := Self.Alignment.Right.Value + Self.Alignment.Right.Offset - side;
+    length := alignment.Right - alignment.Left;
     half := length / 2;
-    center := side + half;
+    center := alignment.Left + half;
+    halfMax := (alignment.MaxWidth - 1) / 2;
 
-    Self.X1 := Max(
-      Floor(center - half),
-      Floor(center - ((Self.Alignment.Center.MaxWidth - 1) / 2))
-    );
-
-    Self.X2 := Min(
-      Floor(center + half),
-      Floor(center + ((Self.Alignment.Center.MaxWidth - 1) / 2))
-    );
+    Self.X1 := Max(Floor(center - half), Floor(center - halfMax));
+    Self.X2 := Min(Floor(center + half), Floor(center + halfMax));
   end
   else
   begin
-    Self.X1 := Round(Self.Alignment.Left.Value + Self.Alignment.Left.Offset);
-    Self.X2 := Round(Self.Alignment.Right.Value + Self.Alignment.Right.Offset);
+    Self.X1 := alignment.Left;
+    Self.X2 := alignment.Right;
   end;
 
-  if Self.Alignment.Center.MaxHeight > 0 then
+  if alignment.MaxHeight > 0 then
   begin
-    side := Self.Alignment.Top.Value + Self.Alignment.Top.Offset;
-    length := Self.Alignment.Bottom.Value + Self.Alignment.Bottom.Offset - side;
+    length := alignment.Bottom - alignment.Top;
     half := length / 2;
-    center := side + half;
+    center := alignment.Top + half;
+    halfMax := (alignment.MaxHeight - 1) / 2;
 
-    Self.Y1 := Max(
-      Floor(center - half),
-      Floor(center - ((Self.Alignment.Center.MaxHeight - 1) / 2))
-    );
-
-    Self.Y2 := Min(
-      Floor(center + half),
-      Floor(center + ((Self.Alignment.Center.MaxHeight - 1) / 2))
-    );
+    Self.Y1 := Max(Floor(center - half), Floor(center - halfMax));
+    Self.Y2 := Min(Floor(center + half), Floor(center + halfMax));
   end
   else
   begin
-    Self.Y1 := Round(Self.Alignment.Top.Value + Self.Alignment.Top.Offset);
-    Self.Y2 := Round(Self.Alignment.Bottom.Value + Self.Alignment.Bottom.Offset);
+    Self.Y1 := alignment.Top;
+    Self.Y2 := alignment.Bottom;
   end;
 
   Self.Bounds := Box(Self.X1, Self.Y1, Self.X2, Self.Y2);
@@ -531,22 +502,16 @@ type
 var
   RootInterface: TRSRootInterface;
 
-
-
 procedure TSRL.Setup(); override;
 begin
-  inherited;
   RootInterface.Name := 'Root Interface';
+  inherited;
 end;
 
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-  RootInterface.Alignment.Left   := [0, 0];
-  RootInterface.Alignment.Top    := [0, 0];
-  RootInterface.Alignment.Right  := [RSClient.Width-1, 0];
-  RootInterface.Alignment.Bottom := [RSClient.Height-1, 0];
-  RootInterface.SetupAlignment();
+  RootInterface.SetupAlignment([0,0,RSClient.Width-1,RSClient.Height-1,0,0]);
 end;
 
 procedure Debug(buttons: TRSButtonArray); overload;

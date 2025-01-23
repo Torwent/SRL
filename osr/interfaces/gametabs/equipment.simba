@@ -72,14 +72,16 @@ begin
   Self.Items.DiscoverOffset := [2, 11, 2, -2];
 end;
 
-procedure TRSEquipment.SetupAlignment(); override;
+procedure TRSEquipment.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
-  Self.Alignment.Left := [GameTab.X1, 0];
-  Self.Alignment.Right := [GameTab.X2, 0];
-  Self.Alignment.Top := [GameTab.Y1, 0];
-  Self.Alignment.Bottom := [GameTab.Y2, 0];
+  alignment.Left := GameTab.X1;
+  alignment.Right := GameTab.X2;
+  alignment.Top := GameTab.Y1;
+  alignment.Bottom := GameTab.Y2;
 
-  inherited;
+  Self.SetupAlignment(alignment);
 
   Self.SlotBoxes := Grid(3,2, 35, 35, [6, 4], [Self.X1+33, Self.Y1+5]) +
                     Grid(3,3, 35, 35, [21, 5], [Self.X1+18, Self.Y1+83]);

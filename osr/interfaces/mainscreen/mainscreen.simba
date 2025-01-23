@@ -171,30 +171,33 @@ begin
   AddOnTerminate(@Self.UpTextBitmapBuffer.Free);
 end;
 
-procedure TRSMainScreen.SetupAlignment(); override;
+procedure TRSMainScreen.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
   case RSClient.Mode of
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
     begin
-      Self.Alignment.Left := [RootInterface.X1];
-      Self.Alignment.Right := [RootInterface.X2];
-      Self.Alignment.Top := [RootInterface.Y1];
-      Self.Alignment.Bottom := [RootInterface.Y2];
+      alignment.Left := RootInterface.X1;
+      alignment.Right := RootInterface.X2;
+      alignment.Top := RootInterface.Y1;
+      alignment.Bottom := RootInterface.Y2;
 
       Self.UpTextArea := [3, 3, 500, 21];
     end;
 
     ERSClientMode.FIXED:
     begin
-      Self.Alignment.Left := [RootInterface.X1, 4];
-      Self.Alignment.Right := [RootInterface.X1, 515];
-      Self.Alignment.Top := [RootInterface.Y1, 4];
-      Self.Alignment.Bottom := [RootInterface.Y1, 337];
+      alignment.Left := RootInterface.X1 + 4;
+      alignment.Right := RootInterface.X1 + 515;
+      alignment.Top := RootInterface.Y1 + 4;
+      alignment.Bottom := RootInterface.Y1 + 337;
 
       Self.UpTextArea := [7, 7, 500, 25];
     end;
   end;
-  inherited;
+
+  Self.SetupAlignment(alignment);
 end;
 
 (*

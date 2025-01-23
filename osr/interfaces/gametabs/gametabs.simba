@@ -114,40 +114,47 @@ begin
   Self.Name := 'GameTabs';
 end;
 
-procedure TRSGameTabs.SetupAlignment(); override;
+procedure TRSGameTabs.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
-  Self.Alignment.Bottom := [RootInterface.Y2, 0];
+  alignment.Bottom := RootInterface.Y2;
 
   case RSClient.Mode of
     ERSClientMode.FIXED:
     begin
-      Self.Alignment.Left := [RootInterface.X2, -242];
-      Self.Alignment.Right := [RootInterface.X2, -2];
-      Self.Alignment.Top := [RootInterface.Y2, -334];
+      alignment.Left := RootInterface.X2 - 242;
+      alignment.Right := RootInterface.X2 - 2;
+      alignment.Top := RootInterface.Y2 - 334;
     end;
 
     ERSClientMode.RESIZABLE_CLASSIC:
     begin
-      Self.Alignment.Left := [RootInterface.X2, -240];
-      Self.Alignment.Right := [RootInterface.X2];
-      Self.Alignment.Top := [RootInterface.Y2, -334];
+      alignment.Left := RootInterface.X2 - 240;
+      alignment.Right := RootInterface.X2;
+      alignment.Top := RootInterface.Y2 - 334;
     end;
 
     ERSClientMode.RESIZABLE_MODERN:
     begin
-      Self.Alignment.Left := [RootInterface.X2, -230];
-      Self.Alignment.Right := [RootInterface.X2];
-      Self.Alignment.Top := [RootInterface.Y2, -346];
+      alignment.Left := RootInterface.X2 - 230;
+      alignment.Right := RootInterface.X2;
+      alignment.Top := RootInterface.Y2 - 346;
     end;
   end;
 
-  inherited;
+  Self.SetupAlignment(alignment);
 
   //Needed because depending on the client width the tabs stack into row(s)
   if (RSClient.Mode = ERSClientMode.RESIZABLE_MODERN) and (RootInterface.Width >= 948) then
   begin
     Self.Y1 += 36;
     Self.Y2 += 36;
+    Self.Bounds := Box(Self.X1, Self.Y1, Self.X2, Self.Y2);
+    Self.Rectangle := Self.Bounds.ToRectangle();
+    Self.Center := Self.Bounds.Middle();
+    Self.Width := Self.Bounds.Width();
+    Self.Height := Self.Bounds.Height();
   end;
 
   Self.SetTabBoxes();

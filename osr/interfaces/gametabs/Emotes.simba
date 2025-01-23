@@ -16,10 +16,10 @@ const
 procedure TRSEmotes.SetupAlignment(Mode: ERSClientMode); override;
 begin
   inherited;
-  Self.Alignment.Left := [@GameTab.X1];
-  Self.Alignment.Right := [@GameTab.X2, 5];
-  Self.Alignment.Top := [@GameTab.Y1];
-  Self.Alignment.Bottom := [@GameTab.Y2];
+  alignment.Left := [@GameTab.X1];
+  alignment.Right := [@GameTab.X2, 5];
+  alignment.Top := [@GameTab.Y1];
+  alignment.Bottom := [@GameTab.Y2];
 end;
 
 function TRSEmotes.ScrollAreaFunction(): TBox;

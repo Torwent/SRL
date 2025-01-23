@@ -34,30 +34,32 @@ begin
   Self.Items.SlotBoxesFunction := @Self.GetAllSlotBoxes;
 end;
 
-procedure TRSDepositBox.SetupAlignment(); override;
+procedure TRSDepositBox.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 const
   BUTTON_ENABLED_COLORS : array of TCTS1Color = [[2369440, 5], [2700350, 5]];
 begin
-  Self.Alignment.Right := [InterfaceArea.X2, 0];
-  Self.Alignment.Bottom := [InterfaceArea.Y2, 0];
-  Self.Alignment.Center.MaxWidth := 425;
-  Self.Alignment.Center.MaxHeight := 313;
+  alignment.Right := InterfaceArea.X2;
+  alignment.Bottom := InterfaceArea.Y2;
+  alignment.MaxWidth := 425;
+  alignment.MaxHeight := 313;
 
   case RSClient.Mode of
     ERSClientMode.FIXED:
     begin
-      Self.Alignment.Left := [InterfaceArea.X1, 0];
-      Self.Alignment.Top := [InterfaceArea.Y1, 0];
+      alignment.Left := InterfaceArea.X1;
+      alignment.Top := InterfaceArea.Y1;
     end;
 
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
     begin
-      Self.Alignment.Left := [InterfaceArea.X1, -1];
-      Self.Alignment.Top := [InterfaceArea.Y1, -1];
+      alignment.Left := InterfaceArea.X1 - 1;
+      alignment.Top := InterfaceArea.Y1 - 1;
     end;
   end;
 
-  inherited;
+  Self.SetupAlignment(alignment);
 
   Self.EquipmentSlotBoxes := [
     Box(77,56,110,89), Box(36,95,69,128), // Helm, Cape

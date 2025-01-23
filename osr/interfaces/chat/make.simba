@@ -40,18 +40,20 @@ end;
 (*
 ## Make.SetupAlignment
 ```pascal
-procedure TRSMake.SetupAlignment(); override;
+procedure TRSMake.SetupAlignment(); overload;
 ```
 Internal method automatically called by SRL on startup used to setup the interface coordinates.
 You will probably never need to use this directly.
 *)
-procedure TRSMake.SetupAlignment(); override;
+procedure TRSMake.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
-  Self.Alignment.Left   := [Chat.X1, 0];
-  Self.Alignment.Right  := [Chat.X2, 0];
-  Self.Alignment.Top    := [Chat.Y1, 0];
-  Self.Alignment.Bottom := [Chat.Y2, 0];
-  inherited;
+  alignment.Left   := Chat.X1;
+  alignment.Right  := Chat.X2;
+  alignment.Top    := Chat.Y1;
+  alignment.Bottom := Chat.Y2;
+  Self.SetupAlignment(alignment);
 end;
 
 

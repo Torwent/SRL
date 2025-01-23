@@ -907,22 +907,25 @@ end;
 (*
 ## Login.SetupAlignment
 ```pascal
-procedure TRSLogin.SetupAlignment(); override;
+procedure TRSLogin.SetupAlignment(); overload;
 ```
 Internal TRSLogin aligment method. This is automatically called by SRL and you
 probably will never need to call this directly.
 
 This is responsible for setting up the TRSLogin interface coordinates.
 *)
-procedure TRSLogin.SetupAlignment(); override;
+procedure TRSLogin.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
-  Self.Alignment.Left   := [RootInterface.X1];
-  Self.Alignment.Right  := [RootInterface.X2];
-  Self.Alignment.Top    := [RootInterface.Y1];
-  Self.Alignment.Bottom := [RootInterface.Y1, 502];
-  Self.Alignment.Center := [764, 0];
+  alignment.Left   := RootInterface.X1;
+  alignment.Right  := RootInterface.X2;
+  alignment.Top    := RootInterface.Y1;
+  alignment.Bottom := RootInterface.Y1 + 502;
+  alignment.MaxWidth := 764;
+  alignment.MaxHeight := 0;
 
-  inherited;
+  Self.SetupAlignment(alignment);
 end;
 
 (*

@@ -96,44 +96,45 @@ Initializes TRSInterfaceArea. This is called automatically for you.
 procedure TRSInterfaceArea.Setup(); override;
 begin
   inherited;
-
-  Self.Name := 'Interface Area';
+  Self.Name := 'InterfaceArea';
   Self.EscapeEnabled := True;
 end;
 
 (*
 ## TRSInterfaceArea.SetupAlignment
 ```pascal
-procedure TRSInterfaceArea.SetupAlignment(); override;
+procedure TRSInterfaceArea.SetupAlignment(); overload;
 ```
 Initializes TRSInterfaceArea coordinates. This is automatically called for you.
 *)
-procedure TRSInterfaceArea.SetupAlignment(); override;
+procedure TRSInterfaceArea.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
+  alignment.Top := MainScreen.Y1;
+  alignment.Left := MainScreen.X1;
+
   case RSclient.Mode of
     ERSClientMode.FIXED:
     begin
-      Self.Alignment.Right := [MainScreen.X2];
-      Self.Alignment.Bottom := [MainScreen.Y2];
+      alignment.Right := MainScreen.X2;
+      alignment.Bottom := MainScreen.Y2;
     end;
 
     ERSClientMode.RESIZABLE_CLASSIC:
     begin
-      Self.Alignment.Right := [GameTabs.X1, -10];
-      Self.Alignment.Bottom := [Chat.Y1];
+      alignment.Right := GameTabs.X1 - 10;
+      alignment.Bottom := Chat.Y1;
     end;
 
     ERSClientMode.RESIZABLE_MODERN:
     begin
-      Self.Alignment.Right := [GameTabs.X1, 15];
-      Self.Alignment.Bottom := [Chat.Y1];
+      alignment.Right := GameTabs.X1 + 15;
+      alignment.Bottom := Chat.Y1;
     end;
   end;
 
-  Self.Alignment.Top := [MainScreen.Y1];
-  Self.Alignment.Left := [MainScreen.X1];
-
-  inherited;
+  Self.SetupAlignment(alignment);
 end;
 
 var
@@ -152,6 +153,7 @@ begin
 
   InterfaceArea.Setup();
   RSInterface.Setup();
+  RSInterface.Name := 'RSInterface';
 end;
 
 procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;

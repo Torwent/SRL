@@ -1367,23 +1367,24 @@ begin
   Self.FINDER_CLERK.MinLongSide := 10;
 end;
 
-procedure TRSGrandExchange.SetupAlignment(); override;
+procedure TRSGrandExchange.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
-  Self.Alignment.Left := [InterfaceArea.X1];
-  Self.Alignment.Right := [InterfaceArea.X2];
-  Self.Alignment.Bottom := [InterfaceArea.Y2];
-  Self.Alignment.Center.MaxWidth := 484;
-  Self.Alignment.Center.MaxHeight := 304;
+  alignment.Left := InterfaceArea.X1;
+  alignment.Right := InterfaceArea.X2;
+  alignment.Bottom := InterfaceArea.Y2;
+  alignment.MaxWidth := 484;
+  alignment.MaxHeight := 304;
 
   case RSClient.Mode of
     ERSClientMode.FIXED:
-      Self.Alignment.Top := [InterfaceArea.Y1];
-
+      alignment.Top := InterfaceArea.Y1;
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
-      Self.Alignment.Top := [InterfaceArea.Y1, -1];
+      alignment.Top := InterfaceArea.Y1 - 1;
   end;
 
-  inherited;
+  Self.SetupAlignment(alignment);
 end;
 
 var

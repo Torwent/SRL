@@ -88,13 +88,15 @@ begin
   Self.Name := 'Chat Buttons';
 end;
 
-procedure TRSChatButtons.SetupAlignment(); override;
+procedure TRSChatButtons.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
-  Self.Alignment.Left := [RootInterface.X1, 0];
-  Self.Alignment.Right := [RootInterface.X1, 518];
-  Self.Alignment.Top := [RootInterface.Y2, -22];
-  Self.Alignment.Bottom := [RootInterface.Y2, 0];
-  inherited;
+  alignment.Left := RootInterface.X1;
+  alignment.Right := RootInterface.X1 + 518;
+  alignment.Top := RootInterface.Y2 - 22;
+  alignment.Bottom := RootInterface.Y2;
+  Self.SetupAlignment(alignment);
 end;
 
 

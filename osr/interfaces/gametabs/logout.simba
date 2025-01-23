@@ -19,13 +19,15 @@ begin
   Self.Name := 'Logout';
 end;
 
-procedure TRSLogout.SetupAlignment(); override;
+procedure TRSLogout.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin 
-  Self.Alignment.Left := [GameTab.X1, -3];
-  Self.Alignment.Right := [GameTab.X2, 3];
-  Self.Alignment.Top := [GameTab.Y1];
-  Self.Alignment.Bottom := [GameTab.Y2];
-  inherited;
+  alignment.Left := GameTab.X1 - 3;
+  alignment.Right := GameTab.X2 + 3;
+  alignment.Top := GameTab.Y1;
+  alignment.Bottom := GameTab.Y2;
+  Self.SetupAlignment(alignment);
 end;
 
 (*

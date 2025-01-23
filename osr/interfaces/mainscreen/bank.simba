@@ -13,31 +13,25 @@ type
   
   // In order FindButtons returns
   ERSBankButton = (
-    WORN,
-    MENU,
-    SWAP,
-    INSERT,
-    ITEM,
-    NOTE,
-    QUANTITY_1,
-    QUANTITY_5,
-    QUANTITY_10,
-    QUANTITY_CUSTOM,
-    QUANTITY_ALL,
-    PLACEHOLDERS,
-    SEARCH,
-    DEPOSIT_INVENTORY,
-    DEPOSIT_WORN   
+    WORN, MENU,
+    SWAP, INSERT,
+    ITEM, NOTE,
+    QUANTITY_1, QUANTITY_5, QUANTITY_10, QUANTITY_CUSTOM, QUANTITY_ALL,
+    PLACEHOLDERS, SEARCH, DEPOSIT_INVENTORY, DEPOSIT_WORN
   );
 
   TRSBank = record(TRSTitledInterface)
     Items: TRSItemInterfaceHandler;
     FINDER_UPTEXT: TStringArray;
     FINDER_OPTION: TStringArray;
+
     QUANTITY_ALL: Int32;
     QUANTITY_ALL_BUT_ONE: Int32;
+
     CachedQuantity: Int32;
-    InceneratorBox: TBox;
+
+    InceneratorBox, SlotsArea: TBox;
+    Tabs, SlotBoxes: TBoxArray;
   end;
 
   TRSBankItem = record
@@ -94,26 +88,11 @@ type
     Quantity: Int32;
   end;
 
-function TRSBank.GetSlotBoxes(): TBoxArray; 
-begin
-  Result := Grid(8, (Self.Height - 135) div 35, 31, 31, [17, 5], [Self.X1 + 57, Self.Y1 + 77]);
-end;
-
-
-function TRSBank.GetTabBoxes(): TBoxArray;
-begin
-  Result := Grid(10, 1, 35, 28, [5, 0], [Self.X1 + 47, Self.Y1 + 42]);
-  Result[0].X1 += 1;
-  Result[0].X2 -= 2;
-end;
 
 function TRSBank.GetTabBox(tab: Int32): TBox;
-var
-  tabs: TBoxArray;
 begin
-  tabs := Self.GetTabBoxes();
-  if InRange(tab, 0, Length(tabs)) then
-    Result := tabs[tab];
+  if InRange(tab, 0, High(Self.Tabs)) then
+    Result := Self.Tabs[tab];
 end;
 
 
@@ -223,10 +202,7 @@ begin
   Result := ((count1 = 94) and (count2 = 116)) or Self.IsTitle('Bank') or Self.IsTitle('Equip');
 
   if Result and waitForItems then
-  begin
-    b := Self.GetSlotBoxes().Merge();
-    WaitUntil(SRL.CountColor(RS_ITEM_BORDER, b) > 0, 50, 1000);
-  end;
+    WaitUntil(SRL.CountColor(RS_ITEM_BORDER, Self.SlotsArea) > 0, 50, 1000);
 end;
 
 function TRSBank.IsOpen(waitTime: Int32; interval: Int32 = -1): Boolean; overload;
@@ -270,8 +246,8 @@ begin
   buttons := Self.GetButtons();
   buttons.Draw(bitmap);
 
-  Bitmap.DrawBoxes(Self.GetTabBoxes(), $00FFFF);
-  Bitmap.DrawBoxes(Self.GetSlotBoxes(), $00FFFF);
+  Bitmap.DrawBoxes(Self.Tabs, $00FFFF);
+  Bitmap.DrawBoxes(Self.SlotBoxes, $00FFFF);
 end;
 
 (*
@@ -292,19 +268,14 @@ function TRSBank.FindItemBoundaries(): TBoxArray;
 var
   tpa, final: TPointArray;
   atpa: T2DPointArray;
-  area, b: TBox;
+  b: TBox;
   i: Int32;
 begin
-  area.X1 := Self.X1 + 57;
-  area.Y1 := Self.Y1 + 77;
-  area.X2 := Self.X2 - 63;
-  area.Y2 := Self.Y2 - 44;
-
-  if SRL.FindColors(final, RS_ITEM_BORDER, area) = 0 then
+  if SRL.FindColors(final, RS_ITEM_BORDER, Self.SlotsArea) = 0 then
     Exit;
 
   for i in [RS_ITEM_YELLOW_STACK, RS_ITEM_WHITE_STACK, RS_ITEM_GREEN_STACK] do
-    if SRL.FindColors(tpa, i, area) > 0 then
+    if SRL.FindColors(tpa, i, Self.SlotsArea) > 0 then
       final += tpa;
 
   atpa := final.Cluster(200, 3);
@@ -312,10 +283,8 @@ begin
   for i := 0 to High(atpa) do
   begin
     b := atpa[i].Bounds();
-    if b.Height() <= 5 then
-      Continue;
-
-    Result += Grid(8, 1, 32, 32, [16], [area.X1, b.Y1 - 1]);
+    if b.Height() <= 5 then Continue;
+    Result += Grid(8, 1, 32, 32, [16], [Self.SlotsArea.X1, b.Y1 - 1]);
   end;
 end;
 
@@ -345,22 +314,32 @@ begin
   Self.QUANTITY_ALL_BUT_ONE := -2;
 end;
 
-procedure TRSBank.SetupAlignment(); override;
+procedure TRSBank.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
-  Self.Alignment.Left := [InterfaceArea.X1];
-  Self.Alignment.Right := [InterfaceArea.X2];
-  Self.Alignment.Top := [InterfaceArea.Y1, 2];
-  Self.Alignment.Center.MaxWidth := 488;
-  Self.Alignment.Center.MaxHeight := 800;
+  alignment.Left := InterfaceArea.X1;
+  alignment.Right := InterfaceArea.X2;
+  alignment.Top := InterfaceArea.Y1 + 2;
+  alignment.MaxWidth := 488;
+  alignment.MaxHeight := 800;
 
   case RSClient.Mode of
     ERSClientMode.FIXED:
-      Self.Alignment.Bottom := [InterfaceArea.Y2, -1];
+      alignment.Bottom := InterfaceArea.Y2 - 1;
     ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
-      Self.Alignment.Bottom := [InterfaceArea.Y2, -2];
+      alignment.Bottom := InterfaceArea.Y2 - 2;
   end;
 
-  inherited;
+  Self.SetupAlignment(alignment);
+
+  Self.Tabs := Grid(10, 1, 35, 28, [5, 0], [Self.X1 + 47, Self.Y1 + 42]);
+  Self.SlotBoxes := Grid(8, (Self.Height - 135) div 35, 31, 31, [17, 5], [Self.X1 + 57, Self.Y1 + 77]);
+
+  Self.SlotsArea.X1 := Self.X1 + 57;
+  Self.SlotsArea.Y1 := Self.Y1 + 77;
+  Self.SlotsArea.X2 := Self.X2 - 63;
+  Self.SlotsArea.Y2 := Self.Y2 - 44;
 
   Self.InceneratorBox.X1 := Self.X1 + 5;
   Self.InceneratorBox.Y1 := Self.Y2 - 113;
@@ -595,16 +574,15 @@ WriteLn Bank.GetCurrentTab;
 *)
 function TRSBank.GetCurrentTab(): Int32;
 var
-  tabs: TBoxArray;
   tab: TBox;
   i: Int32;
 begin
-  tabs := Self.GetTabBoxes();
-  for i := 0 to High(tabs) do
+  for i := 0 to High(Self.Tabs) do
   begin
-    tab := tabs[i];
+    tab := Self.Tabs[i];
+    tab.Y1 := tab.Y2 - 3;
     tab.Y2 += 3;
-    if SRL.CountColor(CTS1(5334129, 0), Tab) = 0 then
+    if SRL.CountColor(CTS1(5334129, 0), tab) = 0 then
       Exit(i);
   end;
 end;
@@ -1315,7 +1293,7 @@ end;
 
 function TRSBank.WithdrawSlot(Item: TRSBankWithdrawSlot; useQuantityButtons: Boolean): Boolean;
 begin
-  Result := Self.WithdrawHelper(Self.GetSlotBoxes()[Item.Slot], Item.Quantity, Item.Noted, useQuantityButtons);
+  Result := Self.WithdrawHelper(Self.SlotBoxes[Item.Slot], Item.Quantity, Item.Noted, useQuantityButtons);
 end;
 
 (*

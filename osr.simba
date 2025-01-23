@@ -149,11 +149,11 @@ end;
 
 procedure TSRL.Setup(); override; // Called first. Don't setup multiple times.
 begin
-  if Self.IsSetup then
-    Exit;
+  if Self.IsSetup then Exit;
     
   inherited;
 
+  RSClient.ClientModeChanged();
   Self.IsSetup := True;
 end;
 
