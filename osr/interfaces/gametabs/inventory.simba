@@ -73,9 +73,9 @@ procedure TRSInventory.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
 begin
-  alignment.Left := GameTab.Bounds.X1;
-  alignment.Right := GameTab.Bounds.X2;
-  alignment.Top := GameTab.Bounds.Y1;
+  alignment.Left   := GameTab.Bounds.X1;
+  alignment.Right  := GameTab.Bounds.X2;
+  alignment.Top    := GameTab.Bounds.Y1;
   alignment.Bottom := GameTab.Bounds.Y2;
 
   Self.SetupAlignment(alignment);

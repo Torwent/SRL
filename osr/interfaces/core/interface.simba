@@ -333,36 +333,33 @@ const
   COLOR_ARROW := CTS2(5206147, 15, 0.03, 0.28);
   COLOR_BORDER := 65536;
 var
-  TPA: TPointArray;
-  Arrows: TBoxArray;
-  Area, B: TBox;
+  tpa: TPointArray;
+  arrows: TBoxArray;
+  b: TBox;
 begin
-  Area := Self.Bounds;
+  if SRL.FindColors(tpa, COLOR_ARROW, Self.Bounds) = 0 then Exit;
 
-  if SRL.FindColors(TPA, COLOR_ARROW, Area) > 0 then
+  for b in tpa.Cluster(1).ToTBA() do
+    if (b.Width = 14) and (b.Height = 14) and (SRL.CountColor(COLOR_BORDER, b.Expand(1, Self.Bounds)) = 62) then
+      arrows += b;
+
+  arrows.SortByX(False);
+
+  if (Length(arrows) >= 2) and (arrows[0].X1 = arrows[1].X1) and (arrows[1].X2 = arrows[1].X2) then
   begin
-    for B in TPA.Cluster(1).ToTBA() do
-      if (B.Width = 14) and (B.Height = 14) and (SRL.CountColor(COLOR_BORDER, B.Expand(1, Area)) = 62) then
-        Arrows += B;
+    if (arrows[0].Y1 > arrows[1].Y1) then
+      Swap(arrows[0], arrows[1]);
 
-    Arrows.SortByX(False);
+    b.X1 := arrows[0].X1;
+    b.Y1 := arrows[0].Y2 + 2;
+    b.X2 := arrows[1].X2;
+    b.Y2 := arrows[1].Y1 - 2;
 
-    if (Length(Arrows) >= 2) and (Arrows[0].X1 = Arrows[1].X1) and (Arrows[1].X2 = Arrows[1].X2) then
+    if SRL.FindColors(tpa, COLOR_BORDER, b) > 0 then
     begin
-      if (Arrows[0].Y1 > Arrows[1].Y1) then
-        Swap(Arrows[0], Arrows[1]);
-
-      B.X1 := Arrows[0].X1;
-      B.Y1 := Arrows[0].Y2 + 2;
-      B.X2 := Arrows[1].X2;
-      B.Y2 := Arrows[1].Y1 - 2;
-
-      if SRL.FindColors(TPA, COLOR_BORDER, B) > 0 then
-      begin
-        Result.SliderRegion := B;
-        Result.Slider := TPA.Bounds;
-        Result.Position := Round((Result.Slider.Y1 - Result.SliderRegion.Y1) * 100 / (Result.SliderRegion.Height - Result.Slider.Height));
-      end;
+      Result.SliderRegion := b;
+      Result.Slider := tpa.Bounds();
+      Result.Position := Round((Result.Slider.Y1 - Result.SliderRegion.Y1) * 100 / (Result.SliderRegion.Height - Result.Slider.Height));
     end;
   end;
 end;
@@ -432,6 +429,7 @@ procedure TRSInterface.Draw(Bitmap: TMufasaBitmap);
 var
   ScrollBar: TRSScrollBar;
 begin
+  WriteLn('Drawing: ', + Self.Name);
   Bitmap.DrawBox(Self.Bounds, $00FFFF);
 
   ScrollBar := Self.GetScrollBar();

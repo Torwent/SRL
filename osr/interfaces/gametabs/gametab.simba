@@ -17,12 +17,20 @@ var
   alignment: TRSInterfaceAlignment;
 begin
   case RSClient.Mode of
-    ERSClientMode.FIXED, ERSClientMode.RESIZABLE_CLASSIC:
+    ERSClientMode.FIXED:
     begin
-      alignment.Left := GameTabs.Bounds.X1 + 28;
-      alignment.Right := GameTabs.Bounds.X2 - 29;
-      alignment.Top := GameTabs.Bounds.Y1 + 36;
-      alignment.Bottom := GameTabs.Bounds.Y2 - 37;
+      alignment.Left   := RootInterface.Bounds.X2 - 214;
+      alignment.Right  := RootInterface.Bounds.X2 - 31;
+      alignment.Top    := RootInterface.Bounds.Y2 - 298;
+      alignment.Bottom := RootInterface.Bounds.Y2 - 37;
+    end;
+
+    ERSClientMode.RESIZABLE_CLASSIC:
+    begin
+      alignment.Left   := RootInterface.Bounds.X2 - 212;
+      alignment.Right  := RootInterface.Bounds.X2 - 29;
+      alignment.Top    := RootInterface.Bounds.Y2 - 298;
+      alignment.Bottom := RootInterface.Bounds.Y2 - 37;
     end;
 
     ERSClientMode.RESIZABLE_MODERN:

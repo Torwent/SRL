@@ -14,49 +14,8 @@ type
   );
 
   TRSGameTabs = record(TRSInterface)
-    Boxes: array [ERSGameTab] of TBox;
+    Boxes: TBoxArray;
   end;
-
-procedure TRSGameTabs.SetTabBoxes();
-var
-  tmp: TBoxArray;
-  i: Int32;
-begin
-  case RSClient.Mode of
-    ERSClientMode.FIXED, ERSClientMode.RESIZABLE_CLASSIC:
-    begin
-      tmp := Grid(7, 2, 30, 33, [3, 265], [Self.Bounds.X1 + 6, Self.Bounds.Y1 + 1]);
-      for i := 0 to High(tmp) do
-        Self.Boxes[ERSGameTab(i)] := tmp[i];
-    end;
-
-    ERSClientMode.RESIZABLE_MODERN:
-      begin
-        // One row
-        if (RootInterface.Width >= 948) then
-        begin
-          tmp := Grid(14, 1, 30, 33, [3, 0], [Self.Bounds.X1 - 197, Self.Bounds.Y2 - 70]);
-
-          for i := 0 to Ord(ERSGameTab.MAGIC) do
-            Self.Boxes[ERSGameTab(i)] := tmp[i];
-
-          for i := Ord(ERSGameTab.MUSIC) downto Ord(ERSGameTab.FRIENDS) - 1 do
-            Self.Boxes[ERSGameTab(i)] := tmp[i-1];
-        end
-        else
-        begin
-          // Two rows
-          tmp := Grid(7, 2, 30, 33, [3, 3], [Self.Bounds.X1, Self.Bounds.Y2 - 70]);
-          for i := 0 to High(tmp) do
-            Self.Boxes[ERSGameTab(i)] := tmp[i];
-        end;
-
-        // Logout button is moved to top right corner
-        Self.Boxes[ERSGameTab(7)] := tmp[10];
-        Self.Boxes[ERSGameTab(10)] := [RootInterface.Bounds.X2 - 19, RootInterface.Bounds.Y1 + 9, RootInterface.Bounds.X2 - 10, RootInterface.Bounds.Y1 + 18];
-      end;
-  end;
-end;
 
 function TRSGameTabs.GetCurrentTab(): ERSGametab;
 var
@@ -102,20 +61,19 @@ end;
 procedure TRSGameTabs.Draw(Bitmap: TMufasaBitmap); override;
 begin
   inherited;
-
   Bitmap.DrawBoxes(Self.Boxes, $00FFFF);
 end;
 
 procedure TRSGameTabs.Setup(); override;
 begin
   inherited;
-    
   Self.Name := 'GameTabs';
 end;
 
 procedure TRSGameTabs.SetupAlignment(); overload;
 var
   alignment: TRSInterfaceAlignment;
+  i: Int32;
 begin
   alignment.Bottom := RootInterface.Bounds.Y2;
 
@@ -136,26 +94,45 @@ begin
 
     ERSClientMode.RESIZABLE_MODERN:
     begin
-      alignment.Left := RootInterface.Bounds.X2 - 230;
       alignment.Right := RootInterface.Bounds.X2;
-      alignment.Top := RootInterface.Bounds.Y2 - 346;
+
+      //Needed because depending on the client width the tabs stack into row(s)
+      if RootInterface.Width >= 948 then
+      begin
+        alignment.Left := RootInterface.Bounds.X2 - 428;
+        alignment.Top := RootInterface.Bounds.Y2 - 35;
+      end
+      else
+      begin
+        alignment.Left := RootInterface.Bounds.X2 - 230;
+        alignment.Top := RootInterface.Bounds.Y2 - 71;
+      end;
     end;
   end;
 
   Self.SetupAlignment(alignment);
 
-  //Needed because depending on the client width the tabs stack into row(s)
-  if (RSClient.Mode = ERSClientMode.RESIZABLE_MODERN) and (RootInterface.Width >= 948) then
-  begin
-    Self.Bounds.Y1 += 36;
-    Self.Bounds.Y2 += 36;
-    Self.Rectangle := Self.Bounds.ToRectangle();
-    Self.Center := Self.Bounds.Middle();
-    Self.Width := Self.Bounds.Width();
-    Self.Height := Self.Bounds.Height();
-  end;
+  case RSClient.Mode of
+    ERSClientMode.FIXED, ERSClientMode.RESIZABLE_CLASSIC:
+      Self.Boxes := Grid(7, 2, 30, 33, [3, 265], [Self.Bounds.X1 + 6, Self.Bounds.Y1 + 1]);
 
-  Self.SetTabBoxes();
+    ERSClientMode.RESIZABLE_MODERN:
+      begin
+        // One row
+        if RootInterface.Width >= 948 then
+        begin
+          Self.Boxes := Grid(14, 1, 30, 33, [3, 0], [Self.Bounds.X1, Self.Bounds.Y2 - 35]);
+          for i := Ord(ERSGameTab.MUSIC) downto Ord(ERSGameTab.FRIENDS) - 1 do
+            Self.Boxes[i] := Self.Boxes[i-1];
+        end
+        else // Two rows
+          Self.Boxes := Grid(7, 2, 30, 33, [3, 3], [Self.Bounds.X1, Self.Bounds.Y2 - 70]);
+
+        // Logout button is moved to top right corner
+        Self.Boxes[7] := Self.Boxes[10];
+        Self.Boxes[10] := [RootInterface.Bounds.X2 - 19, RootInterface.Bounds.Y1 + 9, RootInterface.Bounds.X2 - 10, RootInterface.Bounds.Y1 + 18];
+      end;
+  end;
 end;
 
 var
