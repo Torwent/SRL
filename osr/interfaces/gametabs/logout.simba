@@ -15,7 +15,6 @@ type
 procedure TRSLogout.Setup(); override;
 begin
   inherited;
-  
   Self.Name := 'Logout';
 end;
 

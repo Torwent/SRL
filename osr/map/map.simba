@@ -464,11 +464,7 @@ begin
     end;
 
     if Inc(loops) > 50 then
-    begin
-      WriteLn('ScaledSearch Got Stuck! ArgMax:', matrix.ArgMax(), ' ArgMin: ', matrix.ArgMin(), ' Max: ', matrix.Max(), ' Min: ', matrix.Min(), ' Mean:', matrix.Mean() );
-      bitmap.Debug();
       Break;
-    end;
   end;
 
   n := Self.Loader.Downscale div 2;
