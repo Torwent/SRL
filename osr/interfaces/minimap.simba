@@ -1305,15 +1305,12 @@ var
   counts: TIntegerArray;
   p, a, b, q: TPoint;
 begin
-  WriteLn 'FindDotShadows0';
   if not bmp.FindColors(blacks, BLACK) then Exit;
   SetLength(matrix, bmp.getHeight());
   bounds := Box(4, 4, bmp.GetWidth() - 5, bmp.GetHeight() - 5);
   center := Box(bmp.getCenter(), 1, 1);
 
-
   hi := High(blacks);
-  WriteLn 'FindDotShadows1';
   for i := 0 to hi do //First loop to extract 100% sure dot shadows nd mark things in our matrix with educated guesses (ICON, SHADOW, DOT_CENTER)
   begin
     if i = -1 then Break;
@@ -1367,7 +1364,7 @@ begin
     _SetColor([p, a, b, q], SHADOW);
     _SetColor(_GetDotCenter(p), DOT_CENTER);
   end;
-  WriteLn 'FindDotShadows2';
+
   for i := 0 to hi do //Second loop to go through the remaining black pixels and process them
   begin
     p := blacks[i];
@@ -1403,7 +1400,6 @@ begin
     hi := High(blacks);
     i := -1;
   end;
-  WriteLn 'FindDotShadows3';
 end;
 
 (*
@@ -1630,9 +1626,9 @@ begin
   bitmap.Init();
   bitmap.FromClient(Self.Bounds);
   bitmap.ReplaceColor(0, 1); //We need zero to be unique
-  WriteLn 'getCleanBitmap';
+
   Self.CleanMinimap(bitmap);
-  WriteLn 'getCleanBitmap1';
+
   Result.Init();
   if angle = $FFFF then
     angle := Self.GetCompassAngle(False);

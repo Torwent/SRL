@@ -552,11 +552,9 @@ begin
   Self.Region := [];
   Self.Similarity := 0;
 
-  WriteLn 'Position0';
   clean := Minimap.GetCleanMinimap();
-  WriteLn 'Position1';
   tpa := Self.ScaledSearch(clean);
-  WriteLn 'Position2';
+
   for i := 0 to High(tpa) do
   begin
     hit := Self.FullSearch(clean, Self.Loader.Map, tpa[i], match);
@@ -568,7 +566,6 @@ begin
     end;
   end;
   clean.Free();
-  WriteLn 'Position3';
 
   Self.RegionIndex := Self.Loader.LocalIndex(Result);
   if Self.RegionIndex > -1 then
@@ -581,7 +578,6 @@ begin
     else
       Exit;
   end;
-  WriteLn 'Position4';
 
   Result := [0,0];
 end;
