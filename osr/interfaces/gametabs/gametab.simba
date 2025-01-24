@@ -35,9 +35,9 @@ begin
 
     ERSClientMode.RESIZABLE_MODERN:
     begin
-      alignment.Left := GameTabs.Bounds.X1 + 37;
-      alignment.Right := GameTabs.Bounds.X2 - 10;
-      alignment.Top := GameTabs.Bounds.Y1 + 6;
+      alignment.Left   := RootInterface.Bounds.X2 - 193;
+      alignment.Right  := RootInterface.Bounds.X2 - 10;
+      alignment.Top    := GameTabs.Bounds.Y1 - 269;
       alignment.Bottom := GameTabs.Bounds.Y2 - 78;
     end;
   end;
