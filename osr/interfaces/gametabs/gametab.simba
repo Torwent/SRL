@@ -38,7 +38,7 @@ begin
       alignment.Left   := RootInterface.Bounds.X2 - 193;
       alignment.Right  := RootInterface.Bounds.X2 - 10;
       alignment.Top    := GameTabs.Bounds.Y1 - 269;
-      alignment.Bottom := GameTabs.Bounds.Y2 - 78;
+      alignment.Bottom := GameTabs.Bounds.Y1 - 7;
     end;
   end;
 
