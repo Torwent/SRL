@@ -113,7 +113,7 @@ end;
 
 function TRSOptions.IsOpen(): Boolean;
 begin
-  Result := (GameTabs.GetCurrentTab = ERSGameTab.OPTIONS);
+  Result := GameTabs.GetCurrentTab = ERSGameTab.OPTIONS;
 end;
 
 function TRSOptions.Open(): Boolean;
@@ -121,12 +121,13 @@ begin
   Result := GameTabs.Open(ERSGameTab.OPTIONS);
 end;
 
+
 function TRSOptions.GetButtons(): TRSButtonArray;
 begin
   Result := Self.FindButtons([[38,38]]);
 end;
 
-function TRSOptions.GetButton(Button: ERSOptionsButton): TRSButton;
+function TRSOptions.GetButton(button: ERSOptionsButton): TRSButton;
 var
   Buttons: TRSButtonArray := Self.GetButtons;
 begin
@@ -134,12 +135,13 @@ begin
     Result := Buttons[Button];
 end;
 
+
 function TRSOptions.GetHouseOptionsButtons(): TRSButtonArray;
 begin
   Result := Self.FindButtons([[21, 21], [103, 38], [164, 30]]);
 end;
 
-function TRSOptions.GetHouseOptionsButton(Button: ERSHouseOptionsButton): TRSButton;
+function TRSOptions.GetHouseOptionsButton(button: ERSHouseOptionsButton): TRSButton;
 var
   Buttons: TRSButtonArray;
 begin
@@ -155,26 +157,21 @@ end;
 
 function TRSOptions.OpenHouseOptions(): Boolean;
 begin
-  if Self.IsHouseOptionsOpen then
-    Exit(True);
+  if Self.IsHouseOptionsOpen() then Exit(True);
+  if not Self.Open or not Self.OpenTab(ERSOptionsTab.CONTROLS) then Exit;
 
-  if not Self.Open or not Self.OpenTab(ERSOptionsTab.CONTROLS) then
-    Exit(False);
+  Self.GetButton(ERSOptionsButton.HOUSE).Click();
 
-  Self.GetButton(ERSOptionsButton.HOUSE).Click;
-
-  Result := WaitUntil(Self.IsHouseOptionsOpen, SRL.TruncatedGauss(50, 1500), 3000);
+  Result := WaitUntil(Self.IsHouseOptionsOpen(), SRL.TruncatedGauss(50, 1500), 3000);
 end;
 
 function TRSOptions.CloseHouseOptions(): Boolean;
 begin
-  if not Self.IsHouseOptionsOpen then
-    Exit(True);
-
-  Self.GetHouseOptionsButton(ERSHouseOptionsButton.CLOSE).Click;
-
-  Result := WaitUntil(not Self.IsHouseOptionsOpen, SRL.TruncatedGauss(50, 1500), 3000);
+  if not Self.IsHouseOptionsOpen() then Exit(True);
+  Self.GetHouseOptionsButton(ERSHouseOptionsButton.CLOSE).Click();
+  Result := WaitUntil(not Self.IsHouseOptionsOpen(), SRL.TruncatedGauss(50, 1500), 3000);
 end;
+
 
 function TRSOptions.GetCurrentTab(): ERSOptionsTab;
 var
