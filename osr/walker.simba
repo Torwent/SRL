@@ -504,7 +504,20 @@ begin
       end;
     end
     else if not upText.ContainsAny(Self.WalkUpText) then
-      Exit(ChooseOption.Select('Walk here'));
+    begin
+      if not ChooseOption.Open() then Exit;
+      if not ChooseOption.HasOption(Self.TargetUpText, True, False) then
+        Exit(ChooseOption.Select(Self.WalkUpText));
+
+      if Self.ActionUpText <> [] then
+        Self.RedClicked := ChooseOption.Select(Self.ActionUpText)
+      else
+        Self.RedClicked := ChooseOption.Select(Self.TargetUpText);
+
+      if Self.RedClicked then Self.Walking := False;
+      Exit(Self.RedClicked);
+    end;
+
   end
   else
     Mouse.Move(Minimap.RandomPointOn(minimapPoint, randomness));

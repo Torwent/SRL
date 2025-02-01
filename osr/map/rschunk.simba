@@ -8,15 +8,19 @@ type
     AL_KHARID,
     ARDOUGNE,
     BLAST_FURNACE,
+    CASTLE_WARS,
     CATACOMBS_OF_KOUREND,
+    CATHERBY,
     CORSAIR_COVE_DUNGEON,
     CRAFTING_GUILD,
+    DRAYNOR_VILLAGE,
     EDGEVILLE,
     FALADOR,
     FOSSIL_ISLAND,
     HOSIDIUS_KITCHEN,
     LUMBRIDGE,
     LUNAR_ISLE,
+    MINING_GUILD,
     MOTHERLOADE_MINE,
     MYTHS_GUILD,
     PRIFDDINAS,
@@ -29,21 +33,25 @@ type
     WINTERTODT
   );
 
-function ERSChunk.Get(planes: TIntegerArray = []): TRSMapChunk;
+function ERSChunk.Get(planes: TIntegerArray = []): TRSMapChunk; constref;
 begin
   case Self of
     ERSChunk.AL_KHARID              : Result := Chunk(Box(50,51,53,48), 0);
     ERSChunk.ARDOUGNE               : Result := Chunk(Box(40,52,41,51), [0,3]);
     ERSChunk.BLAST_FURNACE          : Result := Chunk(Box(29,78,30,77), 0);
+    ERSChunk.CASTLE_WARS            : Result := Chunk(Box(37,48,38,47), 0);
     ERSChunk.CATACOMBS_OF_KOUREND   : Result := Chunk(Box(25,157,26,156), 0);
+    ERSChunk.CATHERBY               : Result := Chunk(Box(43,54,44,53), 0);
     ERSChunk.CORSAIR_COVE_DUNGEON   : Result := Chunk(Box(29,142,32,140), 1);
     ERSChunk.CRAFTING_GUILD         : Result := Chunk(Box(45,51,46,51), 0);
+    ERSChunk.DRAYNOR_VILLAGE        : Result := Chunk(Box(47,51,48,50), 0);
     ERSChunk.EDGEVILLE              : Result := Chunk(Box(48,54,48,54), 0);
     ERSChunk.FALADOR                : Result := Chunk(Box(45,53,47,51), 0);
     ERSChunk.FOSSIL_ISLAND          : Result := Chunk(Box(56,61,60,57), [0,1]);
     ERSChunk.HOSIDIUS_KITCHEN       : Result := Chunk(Box(25,56,26,56), 0);
     ERSChunk.LUMBRIDGE              : Result := Chunk(Box(49,51,50,49), [0,1,2]);
     ERSChunk.LUNAR_ISLE             : Result := Chunk(Box(32,61,33,60), 0);
+    ERSChunk.MINING_GUILD           : Result := Chunk(Box(46,152,47,151), 0);
     ERSChunk.MOTHERLOADE_MINE       : Result := Chunk(Box(57,89,59,87), [0,1] );
     ERSChunk.MYTHS_GUILD            : Result := Chunk(Box(38,44,38,44), [0,1,2]);
     ERSChunk.PRIFDDINAS             : Result := Chunk(Box(50,95,51,94), 0);
@@ -62,4 +70,57 @@ end;
 function ERSChunk.Name(): String; constref;
 begin
   Result := ToStr(Self).Replace('_', ' ').Lower().Capitalize();
+end;
+
+
+type
+(*
+(EBankChunk)=
+## type EBankChunk
+EBankChunk is a enumerator that contains all bank chunks supported by WaspLib.
+*)
+  EBankChunk = (
+    AL_KHARID,
+    ARDOUGNE,
+    CASTLE_WARS,
+    CATHERBY,
+    CRAFTING_GUILD,
+    DRAYNOR_VILLAGE,
+    EDGEVILLE,
+    FALADOR,
+    GRAND_EXCHANGE,
+    LUNAR_ISLE,
+    MINING_GUILD,
+    PRIFDDINAS,
+    SEERS_VILLAGE,
+    VARROCK,
+    WINTERTODT,
+    FOSSIL_ISLAND
+  );
+
+function EBankChunk.Name(): String; constref;
+begin
+  Result := ToStr(Self).Replace('_', ' ').Lower().Capitalize();
+end;
+
+function EBankChunk.Get(): TRSMapChunk;
+begin
+  case Self of
+    EBankChunk.AL_KHARID:       Result := ERSChunk.AL_KHARID.Get();
+    EBankChunk.ARDOUGNE:        Result := ERSChunk.ARDOUGNE.Get();
+    EBankChunk.CASTLE_WARS:     Result := ERSChunk.CASTLE_WARS.Get();
+    EBankChunk.CATHERBY:        Result := ERSChunk.CATHERBY.Get();
+    EBankChunk.CRAFTING_GUILD:  Result := ERSChunk.CRAFTING_GUILD.Get();
+    EBankChunk.DRAYNOR_VILLAGE: Result := ERSChunk.DRAYNOR_VILLAGE.Get();
+    EBankChunk.EDGEVILLE:       Result := ERSChunk.EDGEVILLE.Get();
+    EBankChunk.FALADOR:         Result := ERSChunk.FALADOR.Get();
+    EBankChunk.GRAND_EXCHANGE:  Result := ERSChunk.VARROCK.Get();
+    EBankChunk.LUNAR_ISLE:      Result := ERSChunk.LUNAR_ISLE.Get();
+    EBankChunk.MINING_GUILD:    Result := ERSChunk.MINING_GUILD.Get();
+    EBankChunk.PRIFDDINAS:      Result := ERSChunk.PRIFDDINAS.Get();
+    EBankChunk.SEERS_VILLAGE:   Result := ERSChunk.SEERS_VILLAGE.Get();
+    EBankChunk.VARROCK:         Result := ERSChunk.VARROCK.Get();
+    EBankChunk.WINTERTODT:      Result := ERSChunk.WINTERTODT.Get();
+    EBankChunk.FOSSIL_ISLAND:   Result := ERSChunk.FOSSIL_ISLAND.Get();
+  end;
 end;
