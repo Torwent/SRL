@@ -2,39 +2,41 @@
 {$IFNDEF WL_OSR}
   {$I WaspLib/osr.simba}
 {$ENDIF}
-//By Kriptic
+//By Kriptic & Taze
 type
-  TRSEmotes = type TRSInterface;
+  TRSEmotes = record(TRSInterface)
+    SortedEmotesList: TStringArray;
+  end;
 
-const
-  SortedEmotesList: TStringArray = [
-    'Yes', 'No', 'Bow', 'Angry', 'Think', 'Wave', 'Shrug', 'Cheer', 'Beckon', 'Laugh',
-    'Jump for Joy', 'Yawn', 'Dance', 'Jig', 'Spin', 'Headbang', 'Cry', 'Blow Kiss',
-    'Panic', 'Raspberry', 'Clap', 'Salute'
-  ];
-
-procedure TRSEmotes.SetupAlignment(Mode: ERSClientMode); override;
+procedure TRSEmotes.SetupAlignment(); overload;
+var
+  alignment: TRSInterfaceAlignment;
 begin
-  inherited;
-  alignment.Left := [@GameTab.X1];
-  alignment.Right := [@GameTab.X2, 5];
-  alignment.Top := [@GameTab.Y1];
-  alignment.Bottom := [@GameTab.Y2];
+  alignment.Left := GameTab.Bounds.X1;
+  alignment.Right := GameTab.Bounds.X2 + 5;
+  alignment.Top := GameTab.Bounds.Y1;
+  alignment.Bottom := GameTab.Bounds.Y2;
+
+  Self.SetupAlignment(alignment);
+  Self.ScrollArea := Self.Bounds;
 end;
 
 function TRSEmotes.ScrollAreaFunction(): TBox;
 begin
-  Result := Self.Bounds();
-  //Result.Y2 += 5;
-  //Result.X2 += 5;
+  Result := Self.Bounds;
 end;
 
 procedure TRSEmotes.Setup(); override;
 begin
   inherited;
   Self.Name := 'Emotes';
-  Self.GetScrollAreaFunction := @Self.ScrollAreaFunction;
+  SortedEmotesList := [
+    'Yes', 'No', 'Bow', 'Angry', 'Think', 'Wave', 'Shrug', 'Cheer', 'Beckon', 'Laugh',
+    'Jump for Joy', 'Yawn', 'Dance', 'Jig', 'Spin', 'Headbang', 'Cry', 'Blow Kiss',
+    'Panic', 'Raspberry', 'Clap', 'Salute'
+  ];
 end;
+
 procedure TRSEmotes.Scroll(down: Boolean);
 var
   scrollBar: TRSScrollBar;
@@ -103,10 +105,10 @@ begin
   else if emoteName = 'Clap' then
     Result := DTMFromString('mbQAAAHicY2VgYLBjYmAwBWJzIDYDYg8grmBkYCgG4lIgng3D1X4Mn7dUgPGWtbMYKopyGLABRiwYDAA1FwzL')
   else if emoteName = 'Salute' then
-    Result := DTMFromString('mggAAAHicY2NgYEhlYmBIBOJ4IE4D4nQgzgLiLYwMDCeAeDsQLwbi+VD+3KmNDFvWzmLY0BTC8HlLBRivWNDFgAsw4sAQAACUlxH8')
+    Result := DTMFromString('mbQAAAHicY2VgYEhlYmCIB+J0IE4E4iwgrmJkYOgC4iIgng3FMUFmDBubQhg+b6lg2LJ2FsOKBV0M2AAjFgwGAF3ADRM=')
   else
     Result := -1; // Return -1 if the emote is not recognized
-end;  
+end;
 
 function TRSEmotes.LocateEmotes(emoteName: String): TBox;
 var
@@ -201,7 +203,8 @@ var
 procedure TRSClient.ClientModeChanged(); override;
 begin
   inherited;
-  Emotes.SetupAlignment(Self.Mode);
+
+  Emotes.SetupAlignment();
 end;
 
 procedure TSRL.Setup(); override;
@@ -215,4 +218,3 @@ begin
   inherited;
   Emotes.Draw(Bitmap);
 end;
-
